@@ -77,18 +77,24 @@ export default function Authenticated({ user, header, children }) {
                             permission="view project"
                         />
         
-                        
-                      {/* <SidebarItem
-                            href="projects.create"
+                          <SidebarItem
+                            href="promoters.index"
                             icon={Building}
-                            label="Create Project"
-                            permission="add project"
-                        /> */}
+                            label="promoters"
+                            permission="view promoters"
+                        />
+                
                         <SidebarItem
                             href="amenities.index"
                             icon={Building}
                             label="Amenities"
                             permission="view amenities"
+                        />
+                           <SidebarItem
+                            href="categories.index"
+                            icon={Building}
+                            label="Categories"
+                            permission="view categories"
                         />
 
                     </SidebarSection>

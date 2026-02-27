@@ -8,40 +8,23 @@ class Configuration extends Model
 {
     protected $connection = 'mongodb';
     protected $collection = 'configurations';
-
     protected $primaryKey = '_id';
 
     protected $fillable = [
-        'project_id',
-
-        // Category
-        'category',
-
-        // Unit Type
-        'title',
-
-        // Basic Details
-        'price',
-        'size',
-        'possession_date',
-
-        // Room Details
-        'rooms',
-
-        // Images
-        'imageslider',
-        'floorPlans',
-        'galleryImages',
-
-        // Extra Fields
-        'configuration_price',
+        'created_by_id',
+        'created_by_type',
+        'category_ids',
+        'name',
+        'type',
+        'room_sizes',
+        'description',
+        'status',
     ];
 
     protected $casts = [
-        'rooms' => 'array',
-        'imageslider' => 'array',
-        'floorPlans' => 'array',
-        'galleryImages' => 'array',
+        'category_ids' => 'array',
+        'room_sizes' => 'array',
+        'status' => 'boolean',
 
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -51,8 +34,13 @@ class Configuration extends Model
 
 
 
-    public function project()
+    public function createdBy()
     {
-        return $this->belongsTo(Project::class, 'project_id', '_id');
+        return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
+    }
+
+    public function categories()
+    {
+        return Category::whereIn('_id', $this->category_ids ?? [])->get();
     }
 }

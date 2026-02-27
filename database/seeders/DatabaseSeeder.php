@@ -25,5 +25,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PromoterSeeder::class,
         ]);
+        
+        $this->call(StateSeeder::class);
+
+        $this->call(GujaratCitySeeder::class);
+        $this->call(AhmedabadAreaSeeder::class);
     }
 }

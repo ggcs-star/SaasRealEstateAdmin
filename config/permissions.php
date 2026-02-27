@@ -28,6 +28,18 @@ return [
             'edit amenity',
             'delete amenity',
         ],
+        'categories' => [
+            'view categories',
+            'add category',
+            'edit category',
+            'delete category',
+        ],
+        'promoters' => [
+            'view promoters',
+            'add promoter',
+            'edit promoter',
+            'delete promoter',
+        ],
 
     ],
 
@@ -57,6 +69,16 @@ return [
         'amenities.store' => 'add amenity', 
         'amenities.update' => 'edit amenity',
         'amenities.destroy' => 'delete amenity',
+
+        'categories.index' => 'view categories',
+        'categories.store' => 'add category',   
+        'categories.update' => 'edit category',
+        'categories.destroy' => 'delete category',
+
+        'promoters.index' => 'view promoters',
+        'promoters.store' => 'add promoter',
+        'promoters.update' => 'edit promoter',
+        'promoters.destroy' => 'delete promoter',
     ],
 
 ];
