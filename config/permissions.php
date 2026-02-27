@@ -22,6 +22,12 @@ return [
             'edit project',
             'delete project',
         ],
+        'amenities' => [
+            'view amenities',
+            'add amenity',
+            'edit amenity',
+            'delete amenity',
+        ],
 
     ],
 
@@ -46,6 +52,11 @@ return [
         'projects.edit' => 'edit project',
         'projects.update' => 'edit project',
         'projects.delete' => 'delete project',
+
+        'amenities.index' => 'view amenities',
+        'amenities.store' => 'add amenity', 
+        'amenities.update' => 'edit amenity',
+        'amenities.destroy' => 'delete amenity',
     ],
 
 ];

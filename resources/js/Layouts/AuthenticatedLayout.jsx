@@ -69,15 +69,27 @@ export default function Authenticated({ user, header, children }) {
                         label="Command Center"
                     />
                      <SidebarSection title="Project Management">
-{/* 
+
                         <SidebarItem
                             href="projects.index"
                             icon={Building}
                             label="Projects"
                             permission="view project"
+                        />
+        
+                        
+                      {/* <SidebarItem
+                            href="projects.create"
+                            icon={Building}
+                            label="Create Project"
+                            permission="add project"
                         /> */}
-
-                     
+                        <SidebarItem
+                            href="amenities.index"
+                            icon={Building}
+                            label="Amenities"
+                            permission="view amenities"
+                        />
 
                     </SidebarSection>
 
