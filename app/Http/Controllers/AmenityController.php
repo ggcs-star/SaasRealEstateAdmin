@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Amenity;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+
 class AmenityController extends Controller
 {
-    // ✅ List Page
+    // ✅ Index
     public function index()
     {
         $amenities = Amenity::latest()->get()->map(function ($item) {
             return [
-                '_id' => (string) $item->_id, 
+                '_id' => (string) $item->_id,
                 'name' => $item->name,
-                'icon' => $item->icon,
+                'icon_url' => $item->icon_url,
+                'description' => $item->description,
+                'meta_title' => $item->meta_title,
+                'meta_description' => $item->meta_description,
+                'meta_keywords' => $item->meta_keywords,
+                'meta_data' => $item->meta_data,
                 'status' => $item->status,
             ];
         });
@@ -28,19 +34,21 @@ class AmenityController extends Controller
     // ✅ Store
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'icon' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'icon_url' => 'nullable|url',
+            'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'meta_data' => 'nullable|array',
             'status' => 'required|boolean'
         ]);
 
-        $data = $request->only(['name', 'status']);
+        $validated['created_by_id'] = auth()->id();
+        $validated['created_by_type'] = auth()->user()::class;
 
-        if ($request->hasFile('icon')) {
-            $data['icon'] = $request->file('icon')->store('amenities', 'public');
-        }
-
-        Amenity::create($data);
+        Amenity::create($validated);
 
         return back()->with('success', 'Amenity created successfully');
     }
@@ -48,28 +56,20 @@ class AmenityController extends Controller
     // ✅ Update
     public function update(Request $request, $id)
     {
-
-        // dd($request->all(), $id);
-        $request->validate([
+        $amenity = Amenity::findOrFail($id);
+// dd($request->all());
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'icon' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'icon_url' => 'nullable|url',
+            'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'meta_data' => 'nullable|array',
             'status' => 'required|boolean'
         ]);
 
-        $amenity = Amenity::findOrFail($id);
-
-        $data = $request->only(['name', 'status']);
-
-        if ($request->hasFile('icon')) {
-
-            if ($amenity->icon) {
-                Storage::disk('public')->delete($amenity->icon);
-            }
-
-            $data['icon'] = $request->file('icon')->store('amenities', 'public');
-        }
-
-        $amenity->update($data);
+        $amenity->update($validated);
 
         return back()->with('success', 'Amenity updated successfully');
     }
@@ -79,12 +79,8 @@ class AmenityController extends Controller
     {
         $amenity = Amenity::findOrFail($id);
 
-        if ($amenity->icon && Storage::disk('public')->exists($amenity->icon)) {
-            Storage::disk('public')->delete($amenity->icon);
-        }
-
         $amenity->delete();
 
-        return redirect()->back()->with('success', 'Amenity deleted successfully');
+        return back()->with('success', 'Amenity deleted successfully');
     }
 }
