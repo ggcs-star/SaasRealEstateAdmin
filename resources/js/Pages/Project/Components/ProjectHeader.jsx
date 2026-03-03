@@ -1,6 +1,7 @@
 import { MapPin } from "lucide-react";
 
 export default function ProjectHeader({ project }) {
+    console.log("ProjectHeader project:", project);
     return (
         <div className="bg-white p-6 rounded-xl shadow border">
             <div className="flex items-center gap-4">
@@ -21,7 +22,7 @@ export default function ProjectHeader({ project }) {
                     </p>
                     <p className="text-sm flex items-center gap-1 text-gray-500 mt-1">
                         <MapPin size={14} />
-                        {project.area_name}, {project.city_name}, {project.State_name}
+                        {project.area}, {project.city}, {project.state}
                     </p>
                 </div>
             </div>
