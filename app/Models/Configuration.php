@@ -16,6 +16,8 @@ class Configuration extends Model
         'category_ids',
         'name',
         'type',
+        'type_size',
+        'total_configuration_size',
         'room_sizes',
         'description',
         'status',

@@ -11,6 +11,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PromoterController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ProjectEditController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -87,8 +88,19 @@ Route::middleware(['auth', 'check.permission'])->group(function () {
     Route::post('/projects/{id}/assign-promoter', [ProjectController::class, 'assignPromoter'])->name('projects.assignPromoter');
 
     Route::get('/get-cities/{stateId}', [LocationController::class, 'getCities']);
-Route::get('/get-areas/{cityId}', [LocationController::class, 'getAreas']);
-});
+    Route::get('/get-areas/{cityId}', [LocationController::class, 'getAreas']);
+
+    Route::get('/projects/{id}/edit-basic',[ProjectEditController::class, 'editBasic'])->name('projects.edit.basic');
+    Route::put('/projects/{id}/update-basic',[ProjectEditController::class, 'updateBasic'])->name('projects.update.basic');
+    Route::get('/projects/{id}/edit-configurations',[ProjectEditController::class, 'editConfigurations'])->name('projects.edit.configurations');
+    Route::put('/projects/{id}/update-configurations',[ProjectEditController::class, 'updateConfigurations'])->name('projects.update.configurations');
+    Route::get('/projects/{id}/edit-towers',[ProjectEditController::class, 'editTowers'])->name('projects.edit.towers');
+    Route::put('/projects/{id}/update-towers',[ProjectEditController::class, 'updateTowers'])->name('projects.update.towers');
+    Route::get('/projects/{id}/edit-amenities',[ProjectEditController::class, 'editAmenities'])->name('projects.edit.amenities');
+    Route::put('/projects/{id}/update-amenities',[ProjectEditController::class, 'updateAmenities'])->name('projects.update.amenities');
+    Route::get('/projects/{id}/edit-gallery',[ProjectEditController::class, 'editGallery'])->name('projects.edit.gallery');
+    Route::put('/projects/{id}/update-gallery',[ProjectEditController::class, 'updateGallery'])->name('projects.update.gallery');
+    });
 
 
 require __DIR__ . '/auth.php';

@@ -2,7 +2,7 @@ import { Building2 } from "lucide-react";
 
 export default function TowersSection({ towers }) {
     if (!towers?.length) return null;
-
+    console.log("Tower Data:", towers);
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
@@ -33,11 +33,10 @@ export default function TowersSection({ towers }) {
                             </div>
 
                             <span
-                                className={`text-xs px-3 py-1 rounded-full font-medium ${
-                                    tower.status
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-red-100 text-red-600"
-                                }`}
+                                className={`text-xs px-3 py-1 rounded-full font-medium ${tower.status
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-600"
+                                    }`}
                             >
                                 {tower.status ? "Active" : "Inactive"}
                             </span>
@@ -130,57 +129,90 @@ export default function TowersSection({ towers }) {
                         )}
 
 
-
-                        {/* Units Section 🔥 */}
-
+                        {/* Units Section - New Design */}
                         {tower.floors?.length > 0 && (
+                            <div className="border-t mt-4 pt-4">
 
-                            <div className="border-t mt-4 pt-3">
+                                {/* Header */}
+                                <h2 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2 flex justify-between">
+                                    <span>Tower {tower.name}</span>
 
-                                <p className="text-xs text-gray-500 uppercase mb-3">
-                                    Units
-                                </p>
+                                    <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                                        {
+                                            tower.floors
+                                                .flatMap(f => f.units)
+                                                .filter(u => u.status === "available").length
+                                        } Available
+                                    </span>
+                                </h2>
+
+                                <div className="space-y-3">
+
+                                    {tower.floors
+                                        .sort((a, b) => b.floor_number - a.floor_number)
+                                        .map((floor) => (
+
+                                            <div key={floor.floor_number} className="flex items-start gap-4">
+
+                                                {/* Floor Label */}
+                                                <div className="w-12 text-sm font-semibold text-slate-400 pt-2">
+                                                    Flr {floor.floor_number}
+                                                </div>
+
+                                                {/* Units */}
+                                                <div className="flex-1 flex flex-wrap gap-2">
+
+                                                    {floor.units.map((unit, i) => {
+
+                                                        const configuration = tower.configurations.find(
+                                                            (c) => c._id === unit.configuration_id
+                                                        );
+
+                                                        const isAvailable = unit.status === "available";
+                                                        const isBooked = unit.status === "booked";
+                                                        const isHold = unit.status === "hold";
+
+                                                        const bgColor = isAvailable
+                                                            ? "bg-green-500 hover:bg-green-600"
+                                                            : isBooked
+                                                                ? "bg-red-500 hover:bg-red-600 cursor-not-allowed opacity-80"
+                                                                : "bg-yellow-400 hover:bg-yellow-500";
+
+                                                        return (
+                                                            <div key={i} className="relative group">
+                                                                <button
+                                                                    disabled={isBooked}
+                                                                    className={`h-10 w-14 rounded text-[10px] font-bold text-white shadow-sm transition-all transform hover:scale-105 flex flex-col items-center justify-center leading-tight ${bgColor}`}
+                                                                >
+                                                                    <span>{unit.unit_number}</span>
+                                                                    <span className="opacity-75 text-[8px]">
+                                                                        {unit.configuration_name}
+                                                                    </span>
+                                                                </button>
+
+                                                                {/* Tooltip */}
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-slate-800 text-white text-xs p-2 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
+
+                                                                    <div className="font-bold border-b border-slate-600 pb-1 mb-1">
+                                                                        {unit.configuration_name} • {configuration?.name || ""}
+                                                                    </div>
+
+                                                                    <div className="flex justify-between">
+                                                                        <span>Size:</span>
+                                                                        <span>{configuration?.type_size || "N/A"} sqft</span>
+                                                                    </div>
 
 
-                                <div className="space-y-4">
 
-                                    {tower.floors.map((floor) => (
-
-                                        <div
-                                            key={floor.floor_number}
-                                            className="bg-white border rounded-lg p-3"
-                                        >
-
-                                            <p className="text-sm font-semibold mb-2">
-                                                Floor {floor.floor_number}
-                                            </p>
-
-
-                                            <div className="flex flex-wrap gap-2">
-
-                                                {floor.units.map((unit, i) => (
-
-                                                    <span
-                                                        key={i}
-                                                        className="text-xs border px-2 py-1 rounded-md bg-gray-100"
-                                                    >
-                                                        {unit.unit_number}
-                                                        {" "}
-                                                        ({unit.configuration_name})
-                                                    </span>
-
-                                                ))}
-
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-
-                                        </div>
-
-                                    ))}
-
+                                        ))}
                                 </div>
-
                             </div>
-
                         )}
 
                     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 export default function Step1Project({
     data,
@@ -8,77 +8,135 @@ export default function Step1Project({
     states = []
 }) {
     // console.log("Step1 data:", data);
-    
+
     const updateField = (field, value) => {
         setData(field, value);
     };
     const [cities, setCities] = useState([]);
     const [areas, setAreas] = useState([]);
     useEffect(() => {
-    if (data.state_id) {
-        loadCities(data.state_id);
-    }
-}, []);
+        if (data.state_id) {
+            loadCities(data.state_id);
+        }
+    }, []);
 
-useEffect(() => {
-    if (data.city_id) {
-        loadAreas(data.city_id);
-    }
-}, []);
-  const handleStateChange = async (stateId) => {
-    const selectedState = states.find(s => s._id === stateId);
+    useEffect(() => {
+        if (data.city_id) {
+            loadAreas(data.city_id);
+        }
+    }, []);
+    const handleStateChange = async (stateId) => {
+        const selectedState = states.find(s => s._id === stateId);
 
-    setData("state_id", stateId);
-    setData("State_name", selectedState?.name || "");
+        setData("state_id", stateId);
+        setData("State_name", selectedState?.name || "");
 
-    setData("city_id", "");
-    setData("city_name", "");
-    setData("area_id", "");
-    setData("area_name", "");
+        setData("city_id", "");
+        setData("city_name", "");
+        setData("area_id", "");
+        setData("area_name", "");
 
-    setCities([]);
-    setAreas([]);
+        setCities([]);
+        setAreas([]);
 
-    if (!stateId) return;
+        if (!stateId) return;
 
-    await loadCities(stateId);
-};
+        await loadCities(stateId);
+    };
 
-const handleCityChange = async (cityId) => {
-    const selectedCity = cities.find(c => c._id === cityId);
+    const handleCityChange = async (cityId) => {
+        const selectedCity = cities.find(c => c._id === cityId);
 
-    setData("city_id", cityId);
-    setData("city_name", selectedCity?.name || "");
+        setData("city_id", cityId);
+        setData("city_name", selectedCity?.name || "");
 
-    setData("area_id", "");
-    setData("area_name", "");
+        setData("area_id", "");
+        setData("area_name", "");
 
-    setAreas([]);
+        setAreas([]);
 
-    if (!cityId) return;
+        if (!cityId) return;
 
-    await loadAreas(cityId);
-};
+        await loadAreas(cityId);
+    };
     const loadCities = async (stateId) => {
-    try {
-        const res = await axios.get(`/get-cities/${stateId}`);
-        setCities(res.data);
-    } catch (err) {
-        console.error("City load error:", err);
-    }
-};
+        try {
+            const res = await axios.get(`/get-cities/${stateId}`);
+            setCities(res.data);
+        } catch (err) {
+            console.error("City load error:", err);
+        }
+    };
 
-const loadAreas = async (cityId) => {
-    try {
-        const res = await axios.get(`/get-areas/${cityId}`);
-        setAreas(res.data);
-    } catch (err) {
-        console.error("Area load error:", err);
-    }
-};
+    const loadAreas = async (cityId) => {
+        try {
+            const res = await axios.get(`/get-areas/${cityId}`);
+            setAreas(res.data);
+        } catch (err) {
+            console.error("Area load error:", err);
+        }
+    };
+
+    const [errors, setErrors] = useState({});
+    const fieldRefs = {
+        builder_id: useRef(null),
+        name: useRef(null),
+        slug: useRef(null),
+        project_type: useRef(null),
+        price: useRef(null),
+        carpet_area: useRef(null),
+        state_id: useRef(null),
+        city_id: useRef(null),
+        area_id: useRef(null),
+        address: useRef(null),
+        rera_number: useRef(null),
+        project_status: useRef(null),
+        Pincode: useRef(null),
+        latitude: useRef(null),
+        longitude: useRef(null),
+    };
+    const validateStep = () => {
+        let newErrors = {};
+
+        if (!data.builder_id) newErrors.builder_id = "Builder is required";
+        if (!data.name) newErrors.name = "Project Name is required";
+        if (!data.slug) newErrors.slug = "Slug is required";
+        if (!data.project_type) newErrors.project_type = "Project Type is required";
+        if (!data.price) newErrors.price = "Price Range is required";
+        if (!data.carpet_area) newErrors.carpet_area = "Carpet Area is required";
+
+        if (!data.state_id) newErrors.state_id = "State is required";
+        if (!data.city_id) newErrors.city_id = "City is required";
+        if (!data.area_id) newErrors.area_id = "Area is required";
+        if (!data.address) newErrors.address = "Address is required";
+
+        if (!data.rera_number) newErrors.rera_number = "RERA Number is required";
+        if (!data.project_status) newErrors.project_status = "Project Status is required";
+        if (!data.pincode) newErrors.pincode = "Pincode is required";
+        if (!data.latitude) newErrors.latitude = "Latitude is required";
+        if (!data.longitude) newErrors.longitude = "Longitude is required";
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            const firstErrorKey = Object.keys(newErrors)[0];
+
+            const field = fieldRefs[firstErrorKey]?.current;
+
+            if (field) {
+                field.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+                field.focus();
+            }
+
+            return false;
+        }
+
+        return true;
+    };
     return (
         <div className="space-y-8">
-            {/* Header with progress indicator */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Project Details</h2>
                 <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -87,16 +145,17 @@ const loadAreas = async (cityId) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Builder Selection - Full width on mobile, half on desktop */}
                 <div className="lg:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Builder <span className="text-red-500">*</span>
                     </label>
                     <select
+                        ref={fieldRefs.builder_id}
                         value={data.builder_id}
                         onChange={e => updateField('builder_id', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
-                    >
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.builder_id ? "border-red-500" : "border-gray-300"}
+`}                    >
                         <option value="">Select Builder</option>
                         {builders.map(b => (
                             <option key={b._id} value={b._id}>
@@ -104,37 +163,48 @@ const loadAreas = async (cityId) => {
                             </option>
                         ))}
                     </select>
+                    {errors.builder_id && (
+                        <p className="text-red-500 text-xs mt-1">{errors.builder_id}</p>
+                    )}
                 </div>
 
-                {/* Basic Information Group */}
                 <div className="lg:col-span-2">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">Basic Information</h3>
                 </div>
 
-                {/* Project Name */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
                     <input
+                        ref={fieldRefs.name}
                         type="text"
                         placeholder="e.g., Sunrise Heights"
                         value={data.name}
                         onChange={e => updateField('name', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                    />
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.name ? "border-red-500" : "border-gray-300"}
+`} />
+                    {errors.name && (
+                        <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    )}
                 </div>
 
-                {/* Slug */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Slug</label>
                     <div className="relative">
                         <span className="absolute left-3 top-3 text-gray-400 text-sm">/</span>
                         <input
+                            ref={fieldRefs.slug}
                             type="text"
                             placeholder="sunrise-heights"
                             value={data.slug}
                             onChange={e => updateField('slug', e.target.value)}
-                            className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.slug ? "border-red-500" : "border-gray-300"}
+`}
                         />
+                        {errors.slug && (
+                            <p className="text-red-500 text-xs mt-1">{errors.slug}</p>
+                        )}
                     </div>
                 </div>
 
@@ -142,24 +212,37 @@ const loadAreas = async (cityId) => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Project Type</label>
                     <input
+                        ref={fieldRefs.project_type}
                         type="text"
                         placeholder="Premium Condominiums, Luxury Homes"
                         value={data.project_type}
                         onChange={e => updateField('project_type', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.project_type ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.project_type && (
+                        <p className="text-red-500 text-xs mt-1">{errors.project_type}</p>
+                    )}
                 </div>
 
                 {/* Price */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
                     <input
+                        ref={fieldRefs.price}
                         type="text"
                         placeholder="50 Lac - 1 Cr"
                         value={data.price}
                         onChange={e => updateField('price', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.price ? "border-red-500" : "border-gray-300"}
+`}
+
                     />
+                    {errors.price && (
+                        <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+                    )}
                 </div>
 
                 {/* Carpet Area */}
@@ -168,10 +251,16 @@ const loadAreas = async (cityId) => {
                     <input
                         type="text"
                         placeholder="e.g., 1200 sq.ft"
+                        ref={fieldRefs.carpet_area}
                         value={data.carpet_area}
                         onChange={e => updateField('carpet_area', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.carpet_area ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.carpet_area && (
+                        <p className="text-red-500 text-xs mt-1">{errors.carpet_area}</p>
+                    )}
                 </div>
 
                 {/* Descriptions */}
@@ -209,10 +298,12 @@ const loadAreas = async (cityId) => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
                     <select
+                        ref={fieldRefs.state_id}
                         value={data.state_id}
                         onChange={(e) => handleStateChange(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
-                    >
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.state_id ? "border-red-500" : "border-gray-300"}
+`}                    >
                         <option value="">Select State</option>
                         {states.map(state => (
                             <option key={state._id} value={state._id}>
@@ -220,14 +311,20 @@ const loadAreas = async (cityId) => {
                             </option>
                         ))}
                     </select>
+                    {errors.state_id && (
+                        <p className="text-red-500 text-xs mt-1">{errors.state_id}</p>
+                    )}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                     <select
+                        ref={fieldRefs.city_id}
                         value={data.city_id}
                         onChange={(e) => handleCityChange(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.city_id ? "border-red-500" : "border-gray-300"}
+`}
                     >
                         <option value="">Select City</option>
                         {cities.map(city => (
@@ -236,11 +333,15 @@ const loadAreas = async (cityId) => {
                             </option>
                         ))}
                     </select>
+                    {errors.city_id && (
+                        <p className="text-red-500 text-xs mt-1">{errors.city_id}</p>
+                    )}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Area</label>
                     <select
+                        ref={fieldRefs.area_id}
                         value={data.area_id}
                         onChange={(e) => {
                             const areaId = e.target.value;
@@ -250,7 +351,9 @@ const loadAreas = async (cityId) => {
                             setData("area_id", areaId);
                             setData("area_name", selectedArea?.name || "");
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.area_id ? "border-red-500" : "border-gray-300"}
+`}
                     >
                         <option value="">Select Area</option>
                         {areas.map(area => (
@@ -259,17 +362,26 @@ const loadAreas = async (cityId) => {
                             </option>
                         ))}
                     </select>
+                    {errors.area_id && (
+                        <p className="text-red-500 text-xs mt-1">{errors.area_id}</p>
+                    )}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
                     <input
+                      ref={fieldRefs.pincode}
                         type="number"
                         placeholder="e.g., 400001"
                         value={data.pincode}
                         onChange={e => updateField('pincode', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.pincode ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.pincode && (
+                        <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>
+                    )}
                 </div>
 
                 <div className="lg:col-span-2">
@@ -277,35 +389,53 @@ const loadAreas = async (cityId) => {
                     <input
                         type="text"
                         placeholder="Full address of the project"
+                        ref={fieldRefs.address}
                         value={data.address}
                         onChange={e => updateField('address', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.address ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.address && (
+                        <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                    )}
                 </div>
 
                 {/* Coordinates */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
                     <input
+                        ref={fieldRefs.latitude}
                         type="number"
                         placeholder="e.g., 19.0760"
                         step="any"
                         value={data.latitude}
                         onChange={e => updateField('latitude', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.latitude ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.latitude && (
+                        <p className="text-red-500 text-xs mt-1">{errors.latitude}</p>
+                    )}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
                     <input
+                        ref={fieldRefs.longitude}
                         type="number"
                         placeholder="e.g., 72.8777"
                         step="any"
                         value={data.longitude}
                         onChange={e => updateField('longitude', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.longitude ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.longitude && (
+                        <p className="text-red-500 text-xs mt-1">{errors.longitude}</p>
+                    )}
                 </div>
 
                 {/* Project Details */}
@@ -317,12 +447,18 @@ const loadAreas = async (cityId) => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">RERA Number</label>
                     <input
+                        ref={fieldRefs.rera_number}
                         type="text"
                         placeholder="e.g., RERA/2024/001"
                         value={data.rera_number}
                         onChange={e => updateField('rera_number', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors
+${errors.rera_number ? "border-red-500" : "border-gray-300"}
+`}
                     />
+                    {errors.rera_number && (
+                        <p className="text-red-500 text-xs mt-1">{errors.rera_number}</p>
+                    )}
                 </div>
 
                 {/* Dates */}
@@ -330,8 +466,8 @@ const loadAreas = async (cityId) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Possession Date</label>
                     <input
                         type="date"
-                        value={data.possession_date}
-                        onChange={e => updateField('possession_date', e.target.value)}
+                          value={data.possession_date ? data.possession_date.slice(0, 10) : ''}
+    onChange={e => updateField('possession_date', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                     />
                 </div>
@@ -340,8 +476,8 @@ const loadAreas = async (cityId) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Launch Date</label>
                     <input
                         type="date"
-                        value={data.launch_date}
-                        onChange={e => updateField('launch_date', e.target.value)}
+                        value={data.launch_date ? data.launch_date.slice(0, 10) : ''}
+    onChange={e => updateField('launch_date', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                     />
                 </div>
@@ -362,15 +498,20 @@ const loadAreas = async (cityId) => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Project Status</label>
                     <select
+                        ref={fieldRefs.project_status}
                         value={data.project_status}
                         onChange={e => updateField('project_status', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors bg-white
+${errors.project_status ? "border-red-500" : "border-gray-300"}`}
                     >
                         <option value="">Select Status</option>
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing</option>
                         <option value="ready_to_move">Ready to Move</option>
                     </select>
+                    {errors.project_status && (
+                        <p className="text-red-500 text-xs mt-1">{errors.project_status}</p>
+                    )}
                 </div>
 
                 {/* Flags */}
@@ -529,7 +670,11 @@ const loadAreas = async (cityId) => {
             <div className="flex justify-end space-x-4 pt-6 mt-6 border-t">
 
                 <button
-                    onClick={nextStep}
+                    onClick={() => {
+                        if (validateStep()) {
+                            nextStep();
+                        }
+                    }}
                     className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors flex items-center space-x-2"
                 >
                     <span>Next Step</span>

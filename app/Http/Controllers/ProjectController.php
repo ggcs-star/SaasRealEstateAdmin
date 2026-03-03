@@ -82,17 +82,10 @@ class ProjectController extends Controller
             'city',
             'area'
         ])->findOrFail($id);
-
-
-
-
         $amenityIds = $project->amenity_ids ?? [];
         $categoryIds = $project->category_ids ?? [];
         $configurationIds = $project->configuration_ids ?? [];
         $towerIds = $project->tower_ids ?? [];
-
-
-
 
         $amenities = Amenity::whereIn('_id', $amenityIds)
             ->get()
@@ -103,8 +96,6 @@ class ProjectController extends Controller
             ])
             ->values();
 
-
-
         $categories = Category::whereIn('_id', $categoryIds)
             ->get()
             ->map(fn($c) => [
@@ -113,12 +104,9 @@ class ProjectController extends Controller
             ])
             ->values();
 
-
-
         $allConfigurations = Configuration::whereIn('_id', $configurationIds)
             ->get()
             ->keyBy('_id');
-
 
         $configurations = $allConfigurations
             ->map(function ($config) {
@@ -127,13 +115,15 @@ class ProjectController extends Controller
                     '_id' => (string) $config->_id,
                     'name' => $config->name,
                     'type' => $config->type,
+                    'type_size' => $config->type_size ?? null,
+                    'total_configuration_size' => $config->total_configuration_size ?? null,
                     'room_sizes' => $config->room_sizes ?? [],
                     'description' => $config->description,
                     'status' => (bool) $config->status,
                 ];
             })
             ->values();
-
+        // dd($configurations);
 
         $towers = Tower::whereIn('_id', $towerIds)
             ->get()
@@ -148,8 +138,8 @@ class ProjectController extends Controller
                         return $conf ? [
                             '_id' => (string) $conf->_id,
                             'name' => $conf->name,
+                            'type_size' => $conf->type_size ?? null,
                         ] : null;
-
                     })
                     ->filter()
                     ->values();
@@ -161,21 +151,14 @@ class ProjectController extends Controller
                         $conf = $allConfigurations->get($unit['configuration_id'] ?? null);
 
                         return [
-
                             'floor_number' => $unit['floor_number'] ?? null,
-
                             'unit_number' => $unit['unit_number'] ?? null,
-
                             'configuration_id' => $unit['configuration_id'] ?? null,
-
                             'configuration_name' => $conf?->type ?? null,
-
                             'status' => $unit['status'] ?? 'available',
-
                         ];
                     })
                     ->values();
-
 
                 $floors = $units
                     ->groupBy('floor_number')
@@ -189,123 +172,69 @@ class ProjectController extends Controller
                     })
                     ->values();
 
-
-
                 return [
-
                     '_id' => (string) $tower->_id,
-
                     'name' => $tower->name,
-
                     'type' => $tower->type,
-
                     'total_floors' => (int) $tower->total_floors,
-
                     'total_units' => (int) $tower->total_units,
-
                     'floor_designs' => $tower->floor_designs ?? [],
-
                     'configurations' => $towerConfigs,
-
                     'units' => $units,
-
                     'floors' => $floors,
-
                     'status' => (bool) $tower->status,
-
                 ];
 
             })
             ->values();
 
-
-
         return Inertia::render('Project/View', [
 
             'project' => [
-
                 '_id' => (string) $project->_id,
-
                 'name' => $project->name,
                 'slug' => $project->slug,
                 'project_type' => $project->project_type,
-
                 'description' => $project->description,
                 'short_description' => $project->short_description,
-
                 'address' => $project->address,
-
                 'price' => $project->price,
                 'carpet_area' => $project->carpet_area,
-
-
                 'state' => $project->state?->name,
                 'city' => $project->city?->name,
                 'area' => $project->area?->name,
-
                 'pincode' => $project->pincode,
-
                 'latitude' => $project->latitude,
                 'longitude' => $project->longitude,
-
-
                 'rera_number' => $project->rera_number,
-
                 'launch_date' => $project->launch_date,
                 'possession_date' => $project->possession_date,
-
                 'project_status' => $project->project_status,
-
-
                 'cover_image_url' => $project->cover_image_url,
-
                 'gallery_images_url' => $project->gallery_images_url ?? [],
-
                 'floorPlans_images_url' => $project->floorPlans_images_url ?? [],
-
                 'slider_image_url' => $project->slider_image_url ?? [],
-
                 'brochure_url' => $project->brochure_url,
-
                 'reel_url' => $project->reel_url,
-
-
                 'total_units' => $project->total_units,
-
                 'total_towers' => $project->total_towers,
-
                 'total_floors' => $project->total_floors,
-
-
                 'is_featured' => (bool) $project->is_featured,
-
                 'is_emerging_property' => (bool) $project->is_emerging_property,
-
                 'is_new_launch' => (bool) $project->is_new_launch,
-
                 'is_trending' => (bool) $project->is_trending,
-
                 'status' => (bool) $project->status,
-
-
                 'builder' => $project->builder ? [
                     '_id' => (string) $project->builder->_id,
                     'name' => $project->builder->name,
                 ] : null,
-
-
                 'promoter' => $project->promoter ? [
                     '_id' => (string) $project->promoter->_id,
                     'name' => $project->promoter->name,
                 ] : null,
-
-
                 'amenities' => $amenities,
-
                 'categories' => $categories,
-
                 'configurations' => $configurations,
-
                 'towers' => $towers,
 
             ]
@@ -365,77 +294,85 @@ class ProjectController extends Controller
     }
 
     public function edit($id)
-    {
-        $project = Project::findOrFail($id);
+{
+    $project = Project::findOrFail($id);
 
-        $builders = BuilderUser::select('_id', 'name')->get()
-            ->map(fn($b) => [
-                '_id' => (string) $b->_id,
-                'name' => $b->name,
-            ]);
-
-        $amenities = Amenity::select('_id', 'name', 'icon_url')
-            ->whereIn('status', [true, 1, '1'])
-            ->get()
-            ->map(fn($a) => [
-                '_id' => (string) $a->_id,
-                'name' => $a->name,
-                'icon' => $a->icon_url,
-            ]);
-        // dd($amenities);
-        $configurations = Configuration::whereIn(
-            '_id',
-            $project->configuration_ids ?? []
-        )->get()->map(function ($config) {
-
-            return [
-                ...$config->toArray(),
-                '_id' => (string) $config->_id,
-            ];
-        });
-        $towers = Tower::where(
-            'project_id',
-            (string) $project->_id
-        )->get()->map(function ($tower) {
-
-            return [
-                '_id' => (string) $tower->_id,
-                'name' => $tower->name,
-                'type' => $tower->type,
-                'configuration_ids' => $tower->configuration_ids ?? [],
-                'total_floors' => $tower->total_floors,
-                'total_units' => $tower->total_units,
-                'floor_designs' => $tower->floor_designs ?? [],
-                'status' => $tower->status,
-            ];
-        });
-        $states = State::where('status', true)
-            ->select('_id', 'name')
-            ->get()
-            ->map(function ($state) {
-                return [
-                    '_id' => (string) $state->_id,
-                    'name' => $state->name,
-                ];
-            });
-        // dd($configurations);
-        return Inertia::render('Project/Create', [
-            'projectData' => [
-                ...$project->toArray(),
-                '_id' => (string) $project->_id,
-                'amenity_ids' => collect($project->amenity_ids ?? [])
-                    ->map(fn($id) => (string) $id)
-                    ->values()
-                    ->toArray(),
-                'configurations' => $configurations,
-                'towers' => $towers,
-            ],
-            'builders' => $builders,
-            'amenities' => $amenities,
-            'states' => $states,
-            'isEdit' => true
+    $builders = BuilderUser::select('_id', 'name')->get()
+        ->map(fn($b) => [
+            '_id' => (string) $b->_id,
+            'name' => $b->name,
         ]);
-    }
+
+    $amenities = Amenity::select('_id', 'name', 'icon_url')
+        ->whereIn('status', [true, 1, '1'])
+        ->get()
+        ->map(fn($a) => [
+            '_id' => (string) $a->_id,
+            'name' => $a->name,
+            'icon' => $a->icon_url,
+        ]);
+
+    // ✅ ADD THIS (Categories for Edit Page)
+    $categories = Category::select('_id', 'name')
+        ->where('status', true)
+        ->get()
+        ->map(fn($category) => [
+            '_id' => (string) $category->_id,
+            'name' => $category->name,
+        ]);
+
+    $configurations = Configuration::whereIn(
+        '_id',
+        $project->configuration_ids ?? []
+    )->get()->map(function ($config) {
+        return [
+            ...$config->toArray(),
+            '_id' => (string) $config->_id,
+        ];
+    });
+
+    $towers = Tower::where(
+        'project_id',
+        (string) $project->_id
+    )->get()->map(function ($tower) {
+        return [
+            '_id' => (string) $tower->_id,
+            'name' => $tower->name,
+            'type' => $tower->type,
+            'configuration_ids' => $tower->configuration_ids ?? [],
+            'total_floors' => $tower->total_floors,
+            'total_units' => $tower->total_units,
+            'floor_designs' => $tower->floor_designs ?? [],
+            'status' => $tower->status,
+        ];
+    });
+
+    $states = State::where('status', true)
+        ->select('_id', 'name')
+        ->get()
+        ->map(fn($state) => [
+            '_id' => (string) $state->_id,
+            'name' => $state->name,
+        ]);
+
+    return Inertia::render('Project/Create', [
+        'projectData' => [
+            ...$project->toArray(),
+            '_id' => (string) $project->_id,
+            'amenity_ids' => collect($project->amenity_ids ?? [])
+                ->map(fn($id) => (string) $id)
+                ->values()
+                ->toArray(),
+            'configurations' => $configurations,
+            'towers' => $towers,
+        ],
+        'builders' => $builders,
+        'amenities' => $amenities,
+        'categories' => $categories, // ✅ PASS HERE
+        'states' => $states,
+        'isEdit' => true
+    ]);
+}
 
 
     private function validateRequest($request)
@@ -673,39 +610,35 @@ class ProjectController extends Controller
         return $units;
     }
     public function storeAll(Request $request)
-    {
-        // dd($request->all());
-        $validated = $this->validateRequest($request);
+{
+    $validated = $this->validateRequest($request);
 
-        try {
+    try {
+        $project = $this->saveProject($request);
 
-            $project = $this->saveProject($request);
+        [$configMap, $configIds] = $this->saveConfigurations($request, $project);
 
-            [$configMap, $configIds] =
-                $this->saveConfigurations($request, $project);
+        $towerIds = $this->saveUnits($request, $project, $configMap);
 
-            $towerIds =
-                $this->saveUnits($request, $project, $configMap);
+        $project->update([
+            'configuration_ids' => $configIds,
+            'tower_ids' => $towerIds,
+        ]);
 
-            $project->update([
-                'configuration_ids' => $configIds,
-                'tower_ids' => $towerIds,
-                'total_towers' => count($towerIds),
-            ]);
+        $this->updateProjectTotals($project);
 
-            return redirect()
-                ->route('projects.index')
-                ->with('success', 'Project created successfully');
+        return redirect()
+            ->route('projects.index')
+            ->with('success', 'Project created successfully');
 
-        } catch (\Exception $e) {
+    } catch (\Exception $e) {
+        Log::error('Project storeAll failed', [
+            'error' => $e->getMessage()
+        ]);
 
-            Log::error('Project storeAll failed', [
-                'error' => $e->getMessage()
-            ]);
-
-            return back()->with('error', 'Something went wrong.');
-        }
+        return back()->with('error', 'Something went wrong.');
     }
+}
     private function saveProject($request)
     {
         $projectData = $request->except([
@@ -726,7 +659,6 @@ class ProjectController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         $this->validateRequest($request);
 
         $project = Project::findOrFail($id);
@@ -744,18 +676,16 @@ class ProjectController extends Controller
 
             $project->update($projectData);
 
+            [$configMap, $configIds] = $this->saveConfigurations($request, $project);
 
-            [$configMap, $configIds] =
-                $this->saveConfigurations($request, $project);
+            $towerIds = $this->saveUnits($request, $project, $configMap);
 
-            $towerIds =
-                $this->saveUnits($request, $project, $configMap);
-            // dd($towerIds);
             $project->update([
                 'configuration_ids' => $configIds,
                 'tower_ids' => $towerIds,
-                'total_towers' => count($towerIds),
             ]);
+
+            $this->updateProjectTotals($project);
 
             return redirect()
                 ->route('projects.index')
@@ -771,7 +701,14 @@ class ProjectController extends Controller
         }
     }
 
-
+    private function updateProjectTotals($project)
+    {
+        $project->update([
+            'total_towers' => Tower::where('project_id', (string) $project->_id)->count(),
+            'total_units' => Tower::where('project_id', (string) $project->_id)->sum('total_units'),
+            'total_floors' => Tower::where('project_id', (string) $project->_id)->sum('total_floors'),
+        ]);
+    }
 
 
 
