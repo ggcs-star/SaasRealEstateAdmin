@@ -1,8 +1,11 @@
 import { Building2 } from "lucide-react";
 
-export default function TowersSection({ towers }) {
+export default function TowersSection({ towers, unitTypes = [], propertyTypes = [] }) {
     if (!towers?.length) return null;
-    console.log("Tower Data:", towers);
+
+    const getUnitType = (id) => unitTypes.find(u => u._id === id);
+    const getPropertyType = (id) => propertyTypes.find(p => p._id === id);
+    console.log("TowersSection Rendered", { towers, unitTypes, propertyTypes });
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
@@ -33,16 +36,16 @@ export default function TowersSection({ towers }) {
                             </div>
 
                             <span
-                                className={`text-xs px-3 py-1 rounded-full font-medium ${tower.status
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-600"
-                                    }`}
+                                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                                    tower.status
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-red-100 text-red-600"
+                                }`}
                             >
                                 {tower.status ? "Active" : "Inactive"}
                             </span>
 
                         </div>
-
 
                         {/* Stats */}
 
@@ -53,37 +56,6 @@ export default function TowersSection({ towers }) {
                             <Stat label="Total Units" value={tower.total_units} />
 
                         </div>
-
-
-
-                        {/* Configurations */}
-
-                        {tower.configurations?.length > 0 && (
-
-                            <div className="border-t pt-3">
-
-                                <p className="text-xs text-gray-500 uppercase mb-2">
-                                    Configurations
-                                </p>
-
-                                <div className="flex flex-wrap gap-2">
-
-                                    {tower.configurations.map((config) => (
-
-                                        <span
-                                            key={config._id}
-                                            className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md"
-                                        >
-                                            {config.name}
-                                        </span>
-
-                                    ))}
-
-                                </div>
-
-                            </div>
-                        )}
-
 
 
                         {/* Floor Designs */}
@@ -129,11 +101,12 @@ export default function TowersSection({ towers }) {
                         )}
 
 
-                        {/* Units Section - New Design */}
+                        {/* Units Section */}
+
                         {tower.floors?.length > 0 && (
+
                             <div className="border-t mt-4 pt-4">
 
-                                {/* Header */}
                                 <h2 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2 flex justify-between">
                                     <span>Tower {tower.name}</span>
 
@@ -155,18 +128,19 @@ export default function TowersSection({ towers }) {
                                             <div key={floor.floor_number} className="flex items-start gap-4">
 
                                                 {/* Floor Label */}
+
                                                 <div className="w-12 text-sm font-semibold text-slate-400 pt-2">
                                                     Flr {floor.floor_number}
                                                 </div>
 
                                                 {/* Units */}
+
                                                 <div className="flex-1 flex flex-wrap gap-2">
 
                                                     {floor.units.map((unit, i) => {
 
-                                                        const configuration = tower.configurations.find(
-                                                            (c) => c._id === unit.configuration_id
-                                                        );
+                                                        const unitType = getUnitType(unit.unit_type_id);
+                                                        const propertyType = getPropertyType(unit.property_type_id);
 
                                                         const isAvailable = unit.status === "available";
                                                         const isBooked = unit.status === "booked";
@@ -180,39 +154,54 @@ export default function TowersSection({ towers }) {
 
                                                         return (
                                                             <div key={i} className="relative group">
+
                                                                 <button
                                                                     disabled={isBooked}
                                                                     className={`h-10 w-14 rounded text-[10px] font-bold text-white shadow-sm transition-all transform hover:scale-105 flex flex-col items-center justify-center leading-tight ${bgColor}`}
                                                                 >
                                                                     <span>{unit.unit_number}</span>
+
                                                                     <span className="opacity-75 text-[8px]">
-                                                                        {unit.configuration_name}
+                                                                        {unitType?.name || ""}
                                                                     </span>
+
                                                                 </button>
 
                                                                 {/* Tooltip */}
-                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-slate-800 text-white text-xs p-2 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
+
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-44 bg-slate-800 text-white text-xs p-2 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
 
                                                                     <div className="font-bold border-b border-slate-600 pb-1 mb-1">
-                                                                        {unit.configuration_name} • {configuration?.name || ""}
+                                                                        {unitType?.name || "Unit"}
+                                                                    </div>
+
+                                                                    <div className="flex justify-between">
+                                                                        <span>Property:</span>
+                                                                        <span>{propertyType?.name || "N/A"}</span>
                                                                     </div>
 
                                                                     <div className="flex justify-between">
                                                                         <span>Size:</span>
-                                                                        <span>{configuration?.type_size || "N/A"} sqft</span>
+                                                                        <span>{unit.unit_size || "N/A"} sqft</span>
                                                                     </div>
 
-
-
                                                                 </div>
+
                                                             </div>
                                                         );
+
                                                     })}
+
                                                 </div>
+
                                             </div>
+
                                         ))}
+
                                 </div>
+
                             </div>
+
                         )}
 
                     </div>
@@ -224,32 +213,22 @@ export default function TowersSection({ towers }) {
 }
 
 
-
 /* Small Components */
 
 function Stat({ label, value }) {
     return (
         <div>
-            <p className="text-xs text-gray-500 uppercase mb-1">
-                {label}
-            </p>
-            <p className="font-medium text-gray-800">
-                {value ?? "N/A"}
-            </p>
+            <p className="text-xs text-gray-500 uppercase mb-1">{label}</p>
+            <p className="font-medium text-gray-800">{value ?? "N/A"}</p>
         </div>
     );
 }
 
-
 function Detail({ label, value }) {
     return (
         <div>
-            <p className="text-xs text-gray-500 uppercase mb-1">
-                {label}
-            </p>
-            <p className="font-medium text-gray-800">
-                {value ?? "N/A"}
-            </p>
+            <p className="text-xs text-gray-500 uppercase mb-1">{label}</p>
+            <p className="font-medium text-gray-800">{value ?? "N/A"}</p>
         </div>
     );
 }

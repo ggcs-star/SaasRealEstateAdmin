@@ -233,45 +233,45 @@ export default function Index({ auth, projects, promoters }) {
                                                                     href={route('projects.edit', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
-                                                                    Edit Full Project
+                                                                    Edit  Project
                                                                 </Link>
 
-                                                                <Link
+                                                                {/* <Link
                                                                     href={route('projects.edit.basic', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
                                                                     Edit Project Basic Details
-                                                                </Link>
+                                                                </Link> */}
 
                                                                 {/* Configurations Only */}
-                                                                <Link
+                                                                {/* <Link
                                                                     href={route('projects.edit.configurations', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
                                                                     Edit Configurations
-                                                                </Link>
+                                                                </Link> */}
 
                                                                 {/* Towers Only */}
-                                                                <Link
+                                                                {/* <Link
                                                                     href={route('projects.edit.towers', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
                                                                     Edit Towers
-                                                                </Link>
-                                                                
-    <Link
+                                                                </Link> */}
+{/*                                                                 
+                                                                <Link
                                                                     href={route('projects.edit.amenities', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
                                                                     Edit Amenities
-                                                                </Link>
+                                                                </Link> */}
                                                                 {/* Gallery Only */}
-                                                                <Link
+                                                                {/* <Link
                                                                     href={route('projects.edit.gallery', project._id)}
                                                                     className="block px-4 py-2 hover:bg-gray-50 text-sm transition-colors"
                                                                 >
                                                                     Edit Gallery Images
-                                                                </Link>
+                                                                </Link> */}
                                                             </div>
                                                         )}
                                                     </div>

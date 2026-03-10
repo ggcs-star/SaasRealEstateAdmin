@@ -40,6 +40,25 @@ return [
             'edit promoter',
             'delete promoter',
         ],
+        'builder' => [
+            'view builder',
+            'add builder',
+            'edit builder',
+            'delete builder',
+        ],
+        'property types' => [
+            'view property types',
+            'add property type',
+            'edit property type',
+            'delete property type',
+        ],
+
+        'unit types' => [
+            'view unit types',
+            'add unit type',
+            'edit unit type',
+            'delete unit type',
+        ],
 
     ],
 
@@ -79,6 +98,26 @@ return [
         'promoters.store' => 'add promoter',
         'promoters.update' => 'edit promoter',
         'promoters.destroy' => 'delete promoter',
+
+        'builder.index' => 'view builder',
+        'builder-users.index' => 'view builder',
+        'builder-users.create' => 'add builder',
+        'builder-users.store' => 'add builder',
+        'builder-users.edit' => 'edit builder',
+        'builder-users.update' => 'edit builder',
+        'builder-users.destroy' => 'delete builder',
+
+        'property-types.index' => 'view property types',
+        'property-types.create' => 'add property type',
+        'property-types.store' => 'add property type',
+        'property-types.edit' => 'edit property type',
+        'property-types.update' => 'edit property type',
+        'property-types.destroy' => 'delete property type',
+
+        'unit-types.index' => 'view unit types',
+        'unit-types.store' => 'add unit type',
+        'unit-types.update' => 'edit unit type',
+        'unit-types.destroy' => 'delete unit type',
     ],
 
 ];

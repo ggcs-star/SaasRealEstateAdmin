@@ -15,6 +15,9 @@ use App\Models\Promoter;
 use App\Models\State;
 use App\Models\Category;
 use Illuminate\Validation\ValidationException;
+use App\Models\PropertyType;
+use App\Models\UnitType;
+use MongoDB\BSON\ObjectId;
 class ProjectController extends Controller
 {
 
@@ -58,6 +61,7 @@ class ProjectController extends Controller
     }
     public function assignPromoter(Request $request, $id)
     {
+        // dd($request);
         $request->validate([
             'promoter_ids' => 'required|array'
         ]);
@@ -80,113 +84,77 @@ class ProjectController extends Controller
             'promoter',
             'state',
             'city',
-            'area'
+            'area',
+            'towers'
         ])->findOrFail($id);
-        $amenityIds = $project->amenity_ids ?? [];
-        $categoryIds = $project->category_ids ?? [];
-        $configurationIds = $project->configuration_ids ?? [];
-        $towerIds = $project->tower_ids ?? [];
 
-        $amenities = Amenity::whereIn('_id', $amenityIds)
+        $amenities = Amenity::whereIn('_id', $project->amenity_ids ?? [])
             ->get()
             ->map(fn($a) => [
                 '_id' => (string) $a->_id,
                 'name' => $a->name,
                 'status' => (bool) $a->status,
-            ])
-            ->values();
+            ])->values();
 
-        $categories = Category::whereIn('_id', $categoryIds)
+        $categories = Category::whereIn('_id', $project->category_ids ?? [])
             ->get()
             ->map(fn($c) => [
                 '_id' => (string) $c->_id,
                 'name' => $c->name,
-            ])
-            ->values();
+            ])->values();
 
-        $allConfigurations = Configuration::whereIn('_id', $configurationIds)
+
+        $towers = $project->towers->map(function ($tower) {
+
+            $units = collect($tower->units ?? [])
+                ->map(function ($unit) {
+                    return [
+                        'floor_number' => $unit['floor_number'] ?? null,
+                        'unit_number' => $unit['unit_number'] ?? null,
+                        'property_type_id' => $unit['property_type_id'] ?? null,
+                        'unit_type_id' => $unit['unit_type_id'] ?? null,
+                        'unit_size' => $unit['unit_size'] ?? null,
+                        'room_sizes' => $unit['room_sizes'] ?? [],
+                        'status' => $unit['status'] ?? 'available',
+                    ];
+                })->values();
+
+            $floors = $units
+                ->groupBy('floor_number')
+                ->map(fn($floorUnits, $floorNumber) => [
+                    'floor_number' => (int) $floorNumber,
+                    'units' => $floorUnits->values()
+                ])
+                ->values();
+
+            return [
+                '_id' => (string) $tower->_id,
+                'name' => $tower->name,
+                'type' => $tower->type,
+                'total_floors' => (int) $tower->total_floors,
+                'total_units' => (int) $tower->total_units,
+                'floor_designs' => $tower->floor_designs ?? [],
+                'units' => $units,
+                'floors' => $floors,
+                'status' => (bool) $tower->status,
+            ];
+        })->values();
+
+
+        $unitTypes = UnitType::select('_id', 'name')
             ->get()
-            ->keyBy('_id');
+            ->map(fn($u) => [
+                '_id' => (string) $u->_id,
+                'name' => $u->name
+            ]);
 
-        $configurations = $allConfigurations
-            ->map(function ($config) {
-
-                return [
-                    '_id' => (string) $config->_id,
-                    'name' => $config->name,
-                    'type' => $config->type,
-                    'type_size' => $config->type_size ?? null,
-                    'total_configuration_size' => $config->total_configuration_size ?? null,
-                    'room_sizes' => $config->room_sizes ?? [],
-                    'description' => $config->description,
-                    'status' => (bool) $config->status,
-                ];
-            })
-            ->values();
-        // dd($configurations);
-
-        $towers = Tower::whereIn('_id', $towerIds)
+        $propertyTypes = PropertyType::select('_id', 'name')
             ->get()
-            ->map(function ($tower) use ($allConfigurations) {
+            ->map(fn($p) => [
+                '_id' => (string) $p->_id,
+                'name' => $p->name
+            ]);
 
-
-                $towerConfigs = collect($tower->configuration_ids ?? [])
-                    ->map(function ($id) use ($allConfigurations) {
-
-                        $conf = $allConfigurations->get($id);
-
-                        return $conf ? [
-                            '_id' => (string) $conf->_id,
-                            'name' => $conf->name,
-                            'type_size' => $conf->type_size ?? null,
-                        ] : null;
-                    })
-                    ->filter()
-                    ->values();
-
-
-                $units = collect($tower->units ?? [])
-                    ->map(function ($unit) use ($allConfigurations) {
-
-                        $conf = $allConfigurations->get($unit['configuration_id'] ?? null);
-
-                        return [
-                            'floor_number' => $unit['floor_number'] ?? null,
-                            'unit_number' => $unit['unit_number'] ?? null,
-                            'configuration_id' => $unit['configuration_id'] ?? null,
-                            'configuration_name' => $conf?->type ?? null,
-                            'status' => $unit['status'] ?? 'available',
-                        ];
-                    })
-                    ->values();
-
-                $floors = $units
-                    ->groupBy('floor_number')
-                    ->map(function ($floorUnits, $floorNumber) {
-
-                        return [
-                            'floor_number' => (int) $floorNumber,
-                            'units' => $floorUnits->values()
-                        ];
-
-                    })
-                    ->values();
-
-                return [
-                    '_id' => (string) $tower->_id,
-                    'name' => $tower->name,
-                    'type' => $tower->type,
-                    'total_floors' => (int) $tower->total_floors,
-                    'total_units' => (int) $tower->total_units,
-                    'floor_designs' => $tower->floor_designs ?? [],
-                    'configurations' => $towerConfigs,
-                    'units' => $units,
-                    'floors' => $floors,
-                    'status' => (bool) $tower->status,
-                ];
-
-            })
-            ->values();
 
         return Inertia::render('Project/View', [
 
@@ -198,50 +166,63 @@ class ProjectController extends Controller
                 'description' => $project->description,
                 'short_description' => $project->short_description,
                 'address' => $project->address,
+
                 'price' => $project->price,
                 'carpet_area' => $project->carpet_area,
+
                 'state' => $project->state?->name,
                 'city' => $project->city?->name,
                 'area' => $project->area?->name,
+
                 'pincode' => $project->pincode,
                 'latitude' => $project->latitude,
                 'longitude' => $project->longitude,
+
                 'rera_number' => $project->rera_number,
+
                 'launch_date' => $project->launch_date,
                 'possession_date' => $project->possession_date,
+
                 'project_status' => $project->project_status,
+
                 'cover_image_url' => $project->cover_image_url,
                 'gallery_images_url' => $project->gallery_images_url ?? [],
                 'floorPlans_images_url' => $project->floorPlans_images_url ?? [],
                 'slider_image_url' => $project->slider_image_url ?? [],
+
                 'brochure_url' => $project->brochure_url,
                 'reel_url' => $project->reel_url,
+
                 'total_units' => $project->total_units,
                 'total_towers' => $project->total_towers,
                 'total_floors' => $project->total_floors,
+
                 'is_featured' => (bool) $project->is_featured,
                 'is_emerging_property' => (bool) $project->is_emerging_property,
                 'is_new_launch' => (bool) $project->is_new_launch,
                 'is_trending' => (bool) $project->is_trending,
+
                 'status' => (bool) $project->status,
+
                 'builder' => $project->builder ? [
                     '_id' => (string) $project->builder->_id,
                     'name' => $project->builder->name,
                 ] : null,
+
                 'promoter' => $project->promoter ? [
                     '_id' => (string) $project->promoter->_id,
                     'name' => $project->promoter->name,
                 ] : null,
+
                 'amenities' => $amenities,
                 'categories' => $categories,
-                'configurations' => $configurations,
                 'towers' => $towers,
+            ],
 
-            ]
-
+            'unitTypes' => $unitTypes,
+            'propertyTypes' => $propertyTypes,
         ]);
     }
-    // ✅ Create Page
     public function create()
     {
 
@@ -255,6 +236,7 @@ class ProjectController extends Controller
                 ];
             });
 
+        // Amenities
         $amenities = Amenity::select('_id', 'name', 'icon_url')
             ->whereIn('status', [true, 1, '1'])
             ->get()
@@ -266,6 +248,7 @@ class ProjectController extends Controller
                 ];
             });
 
+        // Categories
         $categories = Category::select('_id', 'name')
             ->where('status', true)
             ->get()
@@ -275,6 +258,8 @@ class ProjectController extends Controller
                     'name' => $category->name,
                 ];
             });
+
+        // States
         $states = State::where('status', true)
             ->select('_id', 'name')
             ->get()
@@ -285,99 +270,201 @@ class ProjectController extends Controller
                 ];
             });
 
+        // Property Types
+        $propertyTypes = PropertyType::where('status', true)
+            ->select('_id', 'name', 'slug')
+            ->get()
+            ->map(function ($type) {
+                return [
+                    '_id' => (string) $type->_id,
+                    'name' => $type->name,
+                    'slug' => $type->slug,
+                ];
+            });
+
+        // Unit Types
+        $unitTypes = UnitType::where('status', true)
+            ->select('_id', 'name', 'bhk')
+            ->get()
+            ->map(function ($unit) {
+                return [
+                    '_id' => (string) $unit->_id,
+                    'name' => $unit->name,
+                    'bhk' => $unit->bhk,
+                ];
+            });
+
         return Inertia::render('Project/Create', [
             'builders' => $builders,
             'amenities' => $amenities,
             'categories' => $categories,
             'states' => $states,
+            'propertyTypes' => $propertyTypes,
+            'unitTypes' => $unitTypes,
         ]);
     }
 
     public function edit($id)
-{
-    $project = Project::findOrFail($id);
+    {
+        $project = Project::findOrFail($id);
 
-    $builders = BuilderUser::select('_id', 'name')->get()
-        ->map(fn($b) => [
-            '_id' => (string) $b->_id,
-            'name' => $b->name,
-        ]);
+        // Builders
+        $builders = BuilderUser::select('_id', 'name')
+            ->get()
+            ->map(fn($b) => [
+                '_id' => (string) $b->_id,
+                'name' => $b->name,
+            ]);
 
-    $amenities = Amenity::select('_id', 'name', 'icon_url')
-        ->whereIn('status', [true, 1, '1'])
-        ->get()
-        ->map(fn($a) => [
-            '_id' => (string) $a->_id,
-            'name' => $a->name,
-            'icon' => $a->icon_url,
-        ]);
+        // Amenities
+        $amenities = Amenity::select('_id', 'name', 'icon_url')
+            ->whereIn('status', [true, 1, '1'])
+            ->get()
+            ->map(fn($a) => [
+                '_id' => (string) $a->_id,
+                'name' => $a->name,
+                'icon_url' => $a->icon_url,
+            ]);
 
-    // ✅ ADD THIS (Categories for Edit Page)
-    $categories = Category::select('_id', 'name')
-        ->where('status', true)
-        ->get()
-        ->map(fn($category) => [
-            '_id' => (string) $category->_id,
-            'name' => $category->name,
-        ]);
+        // Categories
+        $categories = Category::select('_id', 'name')
+            ->where('status', true)
+            ->get()
+            ->map(fn($category) => [
+                '_id' => (string) $category->_id,
+                'name' => $category->name,
+            ]);
 
-    $configurations = Configuration::whereIn(
-        '_id',
-        $project->configuration_ids ?? []
-    )->get()->map(function ($config) {
+        // States
+        $states = State::where('status', true)
+            ->select('_id', 'name')
+            ->get()
+            ->map(fn($state) => [
+                '_id' => (string) $state->_id,
+                'name' => $state->name,
+            ]);
+
+        // Property Types
+        $propertyTypes = PropertyType::where('status', true)
+            ->select('_id', 'name', 'slug')
+            ->get()
+            ->map(fn($type) => [
+                '_id' => (string) $type->_id,
+                'name' => $type->name,
+                'slug' => $type->slug,
+            ]);
+
+        // Unit Types
+        $unitTypes = UnitType::where('status', true)
+            ->select('_id', 'name', 'bhk')
+            ->get()
+            ->map(fn($unit) => [
+                '_id' => (string) $unit->_id,
+                'name' => $unit->name,
+                'bhk' => $unit->bhk,
+            ]);
+
+
+
+        // Towers
+        $towers = Tower::where('project_id', (string) $project->_id)
+    ->get()
+    ->map(function ($tower) {
+
         return [
-            ...$config->toArray(),
-            '_id' => (string) $config->_id,
-        ];
-    });
 
-    $towers = Tower::where(
-        'project_id',
-        (string) $project->_id
-    )->get()->map(function ($tower) {
-        return [
             '_id' => (string) $tower->_id,
+            'id' => (string) $tower->_id, // React ke liye
             'name' => $tower->name,
+
             'type' => $tower->type,
-            'configuration_ids' => $tower->configuration_ids ?? [],
-            'total_floors' => $tower->total_floors,
-            'total_units' => $tower->total_units,
-            'floor_designs' => $tower->floor_designs ?? [],
-            'status' => $tower->status,
-        ];
-    });
+            'category' => $tower->type ?? 'apartment',
 
-    $states = State::where('status', true)
-        ->select('_id', 'name')
-        ->get()
-        ->map(fn($state) => [
-            '_id' => (string) $state->_id,
-            'name' => $state->name,
-        ]);
+            'total_floors' => $tower->total_floors ?? 0,
+            'total_units' => $tower->total_units ?? 0,
 
-    return Inertia::render('Project/Create', [
-        'projectData' => [
-            ...$project->toArray(),
-            '_id' => (string) $project->_id,
-            'amenity_ids' => collect($project->amenity_ids ?? [])
-                ->map(fn($id) => (string) $id)
+            // apartment
+            'floor_designs' => collect($tower->floor_designs ?? [])
+                ->map(function ($floor) {
+                    return [
+                        'from_floor' => $floor['from_floor'] ?? null,
+                        'to_floor' => $floor['to_floor'] ?? null,
+                        'units_per_floor' => $floor['units_per_floor'] ?? null,
+                        'property_type_id' => $floor['property_type_id'] ?? null,
+                        'unit_type_id' => $floor['unit_type_id'] ?? null,
+                        'unit_size' => $floor['unit_size'] ?? null,
+                        'room_sizes' => $floor['room_sizes'] ?? [],
+                    ];
+                })
                 ->values()
                 ->toArray(),
-            'configurations' => $configurations,
-            'towers' => $towers,
-        ],
-        'builders' => $builders,
-        'amenities' => $amenities,
-        'categories' => $categories, // ✅ PASS HERE
-        'states' => $states,
-        'isEdit' => true
-    ]);
-}
+
+            // villa
+            'unit_ranges' => collect($tower->unit_ranges ?? [])
+                ->map(function ($range) {
+                    return [
+                        'from_unit' => $range['from_unit'] ?? null,
+                        'to_unit' => $range['to_unit'] ?? null,
+                        'unit_prefix' => $range['unit_prefix'] ?? 'Villa',
+                        'unit_size' => $range['unit_size'] ?? null,
+                        'property_type_id' => $range['property_type_id'] ?? null,
+                        'unit_type_id' => $range['unit_type_id'] ?? null,
+                        'room_sizes' => $range['room_sizes'] ?? [],
+                    ];
+                })
+                ->values()
+                ->toArray(),
+
+            'units' => $tower->units ?? [],
+
+            'status' => $tower->status ?? true,
+        ];
+    });
+    // dd($towers);
+
+        return Inertia::render('Project/Create', [
+
+            'projectData' => [
+                ...$project->toArray(),
+                '_id' => (string) $project->_id,
+
+                'amenity_ids' => collect($project->amenity_ids ?? [])
+                    ->map(fn($id) => (string) $id)
+                    ->values()
+                    ->toArray(),
+
+                'category_ids' => collect($project->category_ids ?? [])
+                    ->map(fn($id) => (string) $id)
+                    ->values()
+                    ->toArray(),
+
+                'property_type_ids' => collect($project->property_type_ids ?? [])
+                    ->map(fn($id) => (string) $id)
+                    ->values()
+                    ->toArray(),
+
+                'unit_type_ids' => collect($project->unit_type_ids ?? [])
+                    ->map(fn($id) => (string) $id)
+                    ->values()
+                    ->toArray(),
+
+                'towers' => $towers,
+            ],
+
+            'builders' => $builders,
+            'amenities' => $amenities,
+            'categories' => $categories,
+            'states' => $states,
+            'propertyTypes' => $propertyTypes,
+            'unitTypes' => $unitTypes,
+
+            'isEdit' => true
+        ]);
+    }
 
 
     private function validateRequest($request)
     {
-        // dd($request->all());
         return $request->validate([
 
             'name' => 'required|string|max:255',
@@ -387,221 +474,180 @@ class ProjectController extends Controller
             'gallery_images_url' => 'nullable|array',
             'floorPlans_images_url' => 'nullable|array',
             'slider_image_url' => 'nullable|array',
+
             'brochure_url' => 'nullable|string',
             'reel_url' => 'nullable|string',
 
             'amenity_ids' => 'nullable|array',
 
-            'configurations' => 'nullable|array',
-
             'towers' => 'nullable|array',
+
             'towers.*.name' => 'nullable|string',
             'towers.*.total_floors' => 'nullable|integer',
+
             'towers.*.floor_designs' => 'nullable|array',
+
         ]);
     }
-    private function saveConfigurations($request, $project)
+
+
+    private function saveUnits($request, $project)
     {
-        $configMap = [];
-        $configIds = [];
-        $allCategoryIds = [];
-
-        if (empty($request->configurations)) {
-            return [$configMap, $configIds];
-        }
-
-        foreach ($request->configurations as $config) {
-
-            $incomingId = $config['id'] ?? null;
-
-            $configData = $config;
-            unset($configData['id']);
-            unset($configData['_id']);
-
-            $configData['project_id'] = (string) $project->_id;
-
-            // Collect categories
-            if (!empty($configData['category_ids'])) {
-                foreach ($configData['category_ids'] as $catId) {
-                    $allCategoryIds[] = (string) $catId;
-                }
-            }
-
-
-            if ($incomingId && str_starts_with($incomingId, 'cfg_')) {
-
-                $created = Configuration::create($configData);
-
-                $realId = (string) $created->_id;
-
-                $configMap[$incomingId] = $realId;
-                $configIds[] = $realId;
-            } else {
-
-                $existing = Configuration::find($incomingId);
-
-                if ($existing) {
-                    $existing->update($configData);
-                    $configIds[] = (string) $existing->_id;
-                }
-            }
-        }
-
-        Configuration::where('project_id', (string) $project->_id)
-            ->whereNotIn('_id', $configIds)
-            ->delete();
-
-        $project->update([
-            'category_ids' => array_values(array_unique($allCategoryIds))
-        ]);
-
-        return [$configMap, $configIds];
-    }
-
-    private function saveUnits($request, $project, $configMap = [])
-    {
-        Log::info("SAVE UNITS START", [
-            'incoming_towers' => $request->towers
-        ]);
-
         $towerIds = [];
+        $propertyTypeIds = [];
+        $unitTypeIds = [];
 
-        if (empty($request->towers)) {
-            Log::info("No towers found in request");
-            return $towerIds;
-        }
-
-        foreach ($request->towers as $tower) {
+        foreach ($request->towers ?? [] as $tower) {
 
             $incomingTowerId = $tower['id'] ?? $tower['_id'] ?? null;
 
-            Log::info("Processing Tower", [
-                'incomingTowerId' => $incomingTowerId,
-                'tower_name' => $tower['name'] ?? null
-            ]);
-
             $floorDesigns = [];
-            $configurationIds = [];
+            $unitRanges = [];
+            $units = [];
+
             $totalUnits = 0;
 
-            if (!empty($tower['floor_designs'])) {
+            $category = $tower['category'] ?? 'apartment';
 
-                foreach ($tower['floor_designs'] as $floor) {
 
-                    $incomingConfigId = $floor['configuration_id'];
 
-                    $realConfigId = $configMap[$incomingConfigId] ?? $incomingConfigId;
+            if ($category === 'apartment') {
 
-                    if (!$realConfigId) {
-                        Log::warning("Config ID not resolved", [
-                            'incomingConfigId' => $incomingConfigId
-                        ]);
-                        continue;
-                    }
+                foreach ($tower['floor_designs'] ?? [] as $floor) {
 
                     $from = (int) $floor['from_floor'];
                     $to = (int) $floor['to_floor'];
                     $unitsPerFloor = (int) $floor['units_per_floor'];
 
                     $floorsCount = ($to - $from) + 1;
-                    $rangeUnits = $floorsCount * $unitsPerFloor;
+                    $totalUnits += $floorsCount * $unitsPerFloor;
 
-                    $totalUnits += $rangeUnits;
+                    $propertyTypeId = $floor['property_type_id'] ?? null;
+                    $unitTypeId = $floor['unit_type_id'] ?? null;
 
-                    $configurationIds[] = $realConfigId;
+                    if ($propertyTypeId) {
+                        $propertyTypeIds[] = (string) $propertyTypeId;
+                    }
+
+                    if ($unitTypeId) {
+                        $unitTypeIds[] = (string) $unitTypeId;
+                    }
 
                     $floorDesigns[] = [
                         'from_floor' => $from,
                         'to_floor' => $to,
                         'units_per_floor' => $unitsPerFloor,
-                        'configuration_id' => $realConfigId,
+                        'property_type_id' => $propertyTypeId,
+                        'unit_type_id' => $unitTypeId,
+                        'unit_size' => (int) ($floor['unit_size'] ?? 0),
+                        'room_sizes' => $floor['room_sizes'] ?? [],
                     ];
                 }
+
+                $units = $this->generateApartmentUnits($tower['name'], $floorDesigns);
             }
 
-            $units = $this->generateUnits(
-                $tower['name'],
-                $floorDesigns
-            );
+
+
+            if ($category !== 'apartment') {
+
+                foreach ($tower['unit_ranges'] ?? [] as $range) {
+
+                    $from = (int) $range['from_unit'];
+                    $to = (int) $range['to_unit'];
+
+                    $totalUnits += ($to - $from) + 1;
+
+                    $propertyTypeId = $range['property_type_id'] ?? null;
+                    $unitTypeId = $range['unit_type_id'] ?? null;
+
+                    if ($propertyTypeId) {
+                        $propertyTypeIds[] = (string) $propertyTypeId;
+                    }
+
+                    if ($unitTypeId) {
+                        $unitTypeIds[] = (string) $unitTypeId;
+                    }
+
+                    $unitRanges[] = [
+                        'from_unit' => $from,
+                        'to_unit' => $to,
+                        'unit_prefix' => $range['unit_prefix'] ?? 'Villa',
+                        'unit_size' => (int) ($range['unit_size'] ?? 0),
+                        'property_type_id' => $propertyTypeId,
+                        'unit_type_id' => $unitTypeId,
+                        'room_sizes' => $range['room_sizes'] ?? [],
+                    ];
+                }
+
+                $units = $this->generateVillaUnits($unitRanges);
+            }
+
+
+
+            $towerId = new ObjectId();
 
             $towerData = [
+                '_id' => $towerId,
                 'project_id' => (string) $project->_id,
-                'type' => 'apartment',
                 'name' => $tower['name'] ?? null,
-                'configuration_ids' => array_values(array_unique($configurationIds)),
+                'type' => $category === 'apartment' ? 'apartment' : 'villa/bungalow',
+                'category' => $category,
                 'total_floors' => (int) ($tower['total_floors'] ?? 0),
                 'total_units' => $totalUnits,
                 'floor_designs' => $floorDesigns,
+                'unit_ranges' => $unitRanges,
                 'units' => $units,
                 'status' => ($tower['status'] ?? "1") == "1",
             ];
 
+            if (!$incomingTowerId || str_starts_with($incomingTowerId, 'tw_')) {
 
-            if ($incomingTowerId && str_starts_with($incomingTowerId, 'tw_')) {
+                Tower::create($towerData);
 
-                Log::info("Creating NEW tower");
+                $towerIds[] = (string) $towerId;
 
-                $createdTower = Tower::create($towerData);
-                $towerIds[] = (string) $createdTower->_id;
-            } elseif ($incomingTowerId) {
+            } else {
 
-                $existingTower = Tower::find($incomingTowerId);
+                $existing = Tower::find($incomingTowerId);
 
-                if ($existingTower) {
+                if ($existing) {
 
-                    Log::info("Updating EXISTING tower", [
-                        'tower_id' => $incomingTowerId
-                    ]);
+                    $existing->update($towerData);
 
-                    $existingTower->update($towerData);
-                    $towerIds[] = (string) $existingTower->_id;
-
-                } else {
-
-                    Log::warning("Tower not found for update", [
-                        'tower_id' => $incomingTowerId
-                    ]);
+                    $towerIds[] = (string) $existing->_id;
                 }
             }
         }
 
-        Log::info("Final Tower IDs", [
-            'towerIds' => $towerIds
-        ]);
-
-        Tower::where('project_id', (string) $project->_id)
-            ->whereNotIn('_id', $towerIds)
-            ->delete();
-
-        return $towerIds;
+        return [
+            'towerIds' => $towerIds,
+            'propertyTypeIds' => array_values(array_unique($propertyTypeIds)),
+            'unitTypeIds' => array_values(array_unique($unitTypeIds)),
+        ];
     }
-    private function generateUnits($towerName, $floorDesigns)
+    private function generateApartmentUnits($towerName, $floorDesigns)
     {
         $units = [];
 
         foreach ($floorDesigns as $design) {
 
-            $fromFloor = (int) $design['from_floor'];
-            $toFloor = (int) $design['to_floor'];
-            $unitsPerFloor = (int) $design['units_per_floor'];
-            $configId = $design['configuration_id'];
+            for ($floor = $design['from_floor']; $floor <= $design['to_floor']; $floor++) {
 
-            for ($floor = $fromFloor; $floor <= $toFloor; $floor++) {
-
-                for ($unit = 1; $unit <= $unitsPerFloor; $unit++) {
+                for ($unit = 1; $unit <= $design['units_per_floor']; $unit++) {
 
                     $unitNumber = $towerName . "-" . $floor . str_pad($unit, 2, "0", STR_PAD_LEFT);
 
                     $units[] = [
 
+                        'tower_name' => $towerName,
                         'floor_number' => $floor,
-
                         'unit_number' => $unitNumber,
-
-                        'configuration_id' => $configId,
-
+                        'property_type_id' => $design['property_type_id'] ?? null,
+                        'unit_type_id' => $design['unit_type_id'] ?? null,
+                        'unit_size' => $design['unit_size'] ?? 0,
+                        'room_sizes' => $design['room_sizes'] ?? [],
                         'status' => 'available'
-
                     ];
                 }
             }
@@ -609,36 +655,66 @@ class ProjectController extends Controller
 
         return $units;
     }
-    public function storeAll(Request $request)
-{
-    $validated = $this->validateRequest($request);
 
-    try {
-        $project = $this->saveProject($request);
+    private function generateVillaUnits($ranges)
+    {
+        $units = [];
 
-        [$configMap, $configIds] = $this->saveConfigurations($request, $project);
+        foreach ($ranges as $range) {
 
-        $towerIds = $this->saveUnits($request, $project, $configMap);
+            for ($i = $range['from_unit']; $i <= $range['to_unit']; $i++) {
 
-        $project->update([
-            'configuration_ids' => $configIds,
-            'tower_ids' => $towerIds,
-        ]);
+                $unitNumber = ($range['unit_prefix'] ?? 'Villa') . " " . $i;
 
-        $this->updateProjectTotals($project);
+                $units[] = [
 
-        return redirect()
-            ->route('projects.index')
-            ->with('success', 'Project created successfully');
+                    'tower_name' => null,
+                    'unit_number' => $unitNumber,
+                    'property_type_id' => $range['property_type_id'] ?? null,
+                    'unit_type_id' => $range['unit_type_id'] ?? null,
+                    'unit_size' => $range['unit_size'] ?? 0,
+                    'room_sizes' => $range['room_sizes'] ?? [],
+                    'status' => 'available'
+                ];
+            }
+        }
 
-    } catch (\Exception $e) {
-        Log::error('Project storeAll failed', [
-            'error' => $e->getMessage()
-        ]);
-
-        return back()->with('error', 'Something went wrong.');
+        return $units;
     }
-}
+    public function storeAll(Request $request)
+    {
+        // dd($request->all());
+        $this->validateRequest($request);
+
+        try {
+
+            $project = $this->saveProject($request);
+
+            $result = $this->saveUnits($request, $project);
+
+            $project->update([
+                'tower_ids' => $result['towerIds'],
+                'property_type_ids' => $result['propertyTypeIds'],
+                'unit_type_ids' => $result['unitTypeIds'],
+            ]);
+
+
+
+            $this->updateProjectTotals($project);
+
+            return redirect()
+                ->route('projects.index')
+                ->with('success', 'Project created successfully');
+
+        } catch (\Exception $e) {
+
+            Log::error('Project storeAll failed', [
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Something went wrong.');
+        }
+    }
     private function saveProject($request)
     {
         $projectData = $request->except([
@@ -659,6 +735,7 @@ class ProjectController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->all());    
         $this->validateRequest($request);
 
         $project = Project::findOrFail($id);
@@ -666,7 +743,6 @@ class ProjectController extends Controller
         try {
 
             $projectData = $request->except([
-                'configurations',
                 'towers',
                 '_method',
                 '_token'
@@ -676,12 +752,9 @@ class ProjectController extends Controller
 
             $project->update($projectData);
 
-            [$configMap, $configIds] = $this->saveConfigurations($request, $project);
-
-            $towerIds = $this->saveUnits($request, $project, $configMap);
+            $towerIds = $this->saveUnits($request, $project);
 
             $project->update([
-                'configuration_ids' => $configIds,
                 'tower_ids' => $towerIds,
             ]);
 
@@ -700,13 +773,11 @@ class ProjectController extends Controller
             return back()->with('error', 'Something went wrong.');
         }
     }
-
     private function updateProjectTotals($project)
     {
         $project->update([
             'total_towers' => Tower::where('project_id', (string) $project->_id)->count(),
             'total_units' => Tower::where('project_id', (string) $project->_id)->sum('total_units'),
-            'total_floors' => Tower::where('project_id', (string) $project->_id)->sum('total_floors'),
         ]);
     }
 

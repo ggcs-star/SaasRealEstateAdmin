@@ -12,6 +12,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PromoterController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProjectEditController;
+use App\Http\Controllers\BuilderUserController;
+use App\Http\Controllers\PropertyTypeController;
+use App\Http\Controllers\UnitTypeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -100,6 +103,15 @@ Route::middleware(['auth', 'check.permission'])->group(function () {
     Route::put('/projects/{id}/update-amenities',[ProjectEditController::class, 'updateAmenities'])->name('projects.update.amenities');
     Route::get('/projects/{id}/edit-gallery',[ProjectEditController::class, 'editGallery'])->name('projects.edit.gallery');
     Route::put('/projects/{id}/update-gallery',[ProjectEditController::class, 'updateGallery'])->name('projects.update.gallery');
+
+    Route::get('/builder',[BuilderUserController::class, 'index'])->name('builder.index');
+    Route::post('/builder/store',[BuilderUserController::class, 'store'])->name('builder.store');
+    Route::post('/builder/update/{id}',[BuilderUserController::class, 'update'])->name('builder.update');
+    Route::delete('/builder/delete/{id}',[BuilderUserController::class, 'destroy'])->name('builder.destroy');
+    
+    Route::resource('property-types', PropertyTypeController::class);
+    Route::resource('unit-types', UnitTypeController::class)->only(['index','store','update','destroy']);
+    
     });
 
 
