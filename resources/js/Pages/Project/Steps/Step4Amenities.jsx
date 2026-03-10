@@ -25,18 +25,7 @@ export default function Step4Amenities({
 
    return (
     <div className="space-y-8">
-        {/* Header with progress */}
-        <div className="flex items-center justify-between mb-6">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800">Project Amenities</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                    Select amenities available in your project
-                </p>
-            </div>
-            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                Step 4 of 4
-            </span>
-        </div>
+       
 
         {/* Selected Count Badge */}
         <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg p-4">
@@ -57,20 +46,7 @@ export default function Step4Amenities({
             </div>
         </div>
 
-        {/* Search Bar (Optional enhancement - no logic change needed) */}
-        <div className="relative">
-            <input
-                type="text"
-                placeholder="Search amenities..."
-                className="w-full px-4 py-3 pl-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                // Note: Search functionality not implemented to keep logic exactly the same
-                // This is just a visual enhancement
-                readOnly
-            />
-            <svg className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        </div>
+      
 
         {/* Amenities Grid */}
         {amenities.length === 0 ? (
@@ -219,7 +195,7 @@ export default function Step4Amenities({
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 mt-6 border-t border-gray-200">
+        {/* <div className="flex justify-between pt-6 mt-6 border-t border-gray-200">
             <button
                 onClick={prevStep}
                 className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
@@ -246,7 +222,7 @@ export default function Step4Amenities({
                     </svg>
                 </button>
             </div>
-        </div>
+        </div> */}
     </div>
 );
 }

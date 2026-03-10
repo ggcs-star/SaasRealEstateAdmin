@@ -19,7 +19,7 @@ export default function ProjectDetails({ project }) {
             year: "numeric",
         });
     };
-
+console.log("Project Data:", project); // Debugging log to check project data structure
     // Status badges configuration
     const statusBadges = [
         { condition: project.is_featured, label: "Featured", color: "bg-purple-100 text-purple-700 border-purple-200" },
@@ -71,7 +71,7 @@ export default function ProjectDetails({ project }) {
             {/* 🔹 Quick Stats Banner */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white px-8 py-6 border-b border-gray-100">
                 <QuickStat icon="💰" label="Price" value={project.price} />
-                <QuickStat icon="📐" label="Carpet Area" value={`${project.carpet_area ?? "N/A"} sq.ft`} />
+                <QuickStat icon="📐" label="Carpet Area" value={`${project.carpet_area ?? "N/A"}`} />
                 <QuickStat icon="🏗️" label="Type" value={project.project_type ?? "N/A"} />
                 <QuickStat icon="📅" label="Possession" value={formatDate(project.possession_date)} />
             </div>
@@ -84,7 +84,6 @@ export default function ProjectDetails({ project }) {
                     <DetailItem label="Project Status" value={project.project_status} />
                     <DetailItem label="Total Units" value={project.total_units} />
                     <DetailItem label="Total Towers" value={project.total_towers} />
-                    <DetailItem label="Total Floors" value={project.total_floors} />
                     <DetailItem label="RERA Number" value={project.rera_number} />
                     <DetailItem label="Launch Date" value={formatDate(project.launch_date)} />
                 </Section>

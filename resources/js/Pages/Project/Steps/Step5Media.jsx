@@ -24,18 +24,7 @@ export default function Step5Media({ data, setData, prevStep, submitAll }) {
 
     return (
     <div className="space-y-8">
-        {/* Header with progress */}
-        <div className="flex items-center justify-between mb-6">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800">Project Media</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                    Add images, brochures, and videos for your project
-                </p>
-            </div>
-            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                Final Step
-            </span>
-        </div>
+       
 
         {/* Cover Image Section */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
@@ -376,7 +365,7 @@ export default function Step5Media({ data, setData, prevStep, submitAll }) {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 mt-6 border-t border-gray-200">
+        {/* <div className="flex justify-between pt-6 mt-6 border-t border-gray-200">
             <button
                 type="button"
                 onClick={prevStep}
@@ -398,7 +387,7 @@ export default function Step5Media({ data, setData, prevStep, submitAll }) {
                 </svg>
                 Submit Project
             </button>
-        </div>
+        </div> */}
     </div>
 );
 }

@@ -19,7 +19,8 @@ class Project extends Model
         // Relations
         'builder_id',
         'promoter_id',
-
+'property_type_ids',
+'unit_type_ids',
         'category_ids',
         'configuration_ids',
         'amenity_ids',
@@ -97,7 +98,8 @@ class Project extends Model
         'configuration_ids' => 'array',
         'amenity_ids' => 'array',
         'tower_ids' => 'array',
-
+'property_type_ids' => 'array',
+'unit_type_ids' => 'array',
         'gallery_images_url' => 'array',
         'floorPlans_images_url' => 'array',
         'slider_image_url' => 'array',
@@ -178,6 +180,11 @@ class Project extends Model
     {
         return Configuration::whereIn('_id', $this->configuration_ids ?? [])->get();
     }
+
+    public function towers()
+{
+    return $this->hasMany(Tower::class, 'project_id', '_id');
+}
 
     // public function towers()
     // {

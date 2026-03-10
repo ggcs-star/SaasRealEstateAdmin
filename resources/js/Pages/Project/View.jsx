@@ -5,18 +5,16 @@ import { Head, usePage } from "@inertiajs/react";
 import ProjectHeader from "./Components/ProjectHeader";
 import ProjectDetails from "./Components/ProjectDetails";
 import AmenitiesSection from "./Components/AmenitiesSection";
-import ConfigurationsSection from "./Components/ConfigurationsSection";
 import TowersSection from "./Components/TowersSection";
 
-export default function View({ project }) {
+export default function View({ project , unitTypes, propertyTypes}) {
 
     const { auth } = usePage().props;
 
     const steps = [
         { id: 1, label: "Project Details" },
         { id: 2, label: "Amenities" },
-        { id: 3, label: "Configurations" },
-        { id: 4, label: "Towers" },
+        { id: 3, label: "Towers" },
     ];
 
     const [activeStep, setActiveStep] = useState(1);
@@ -57,12 +55,9 @@ export default function View({ project }) {
                         <AmenitiesSection amenities={project.amenities} />
                     )}
 
+                  
                     {activeStep === 3 && (
-                        <ConfigurationsSection configurations={project.configurations} />
-                    )}
-
-                    {activeStep === 4 && (
-                        <TowersSection towers={project.towers} />
+                        <TowersSection towers={project.towers} unitTypes={unitTypes} propertyTypes={propertyTypes} />
                     )}
                 </div>
 

@@ -29,6 +29,7 @@ export default function Step2Configuration({
         // 👇 Open only newly added one
         setActiveIndex(configurations.length);
     };
+    
 
     const removeConfiguration = (index) => {
         const updated = configurations.filter((_, i) => i !== index);
@@ -499,9 +500,9 @@ ${errors[`type_size_${index}`] ? "border-red-500" : "border-gray-300"}
                     <button
                         type="button"
                         onClick={() => {
-                            if (validateStep()) {
+                            // if (validateStep()) {
                                 nextStep();
-                            }
+                            // }
                         }}
                         className="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                     >
