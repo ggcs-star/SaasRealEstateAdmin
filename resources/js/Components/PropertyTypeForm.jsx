@@ -8,14 +8,14 @@ export default function PropertyTypeForm({
 }) {
     const { data, setData, post, put, processing } = useForm({
         name: propertyType?.name || "",
-        category_id: propertyType?.category_id || "",
+        category_ids: propertyType?.category_ids ? [...propertyType.category_ids] : [],
         description: propertyType?.description || "",
         meta_title: propertyType?.meta_title || "",
         meta_description: propertyType?.meta_description || "",
         meta_keywords: propertyType?.meta_keywords || "",
         status: propertyType?.status ?? true
     });
-
+    console.log(data.category_ids)
     const submit = (e) => {
         e.preventDefault();
 
@@ -29,6 +29,18 @@ export default function PropertyTypeForm({
             });
         }
     };
+    const toggleCategory = (id) => {
+
+        let updated = [...data.category_ids];
+
+        if (updated.includes(id)) {
+            updated = updated.filter(c => c !== id);
+        } else {
+            updated.push(id);
+        }
+
+        setData("category_ids", updated);
+    };
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
@@ -39,7 +51,7 @@ export default function PropertyTypeForm({
                     {/* Decorative Elements */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
-                    
+
                     <div className="flex items-center justify-between relative">
                         <div className="flex items-center space-x-3">
                             <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -99,33 +111,35 @@ export default function PropertyTypeForm({
 
                         {/* Category Select with Custom Styling */}
                         <div className="group">
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Category <span className="text-red-500">*</span>
                             </label>
-                            <div className="relative">
-                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-5-5A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                    </svg>
-                                </div>
-                                <select
-                                    value={data.category_id}
-                                    onChange={(e) => setData("category_id", e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none appearance-none bg-white"
-                                >
-                                    <option value="" className="text-gray-400">Select a category</option>
-                                    {categories.map(cat => (
-                                        <option key={cat._id} value={cat._id} className="py-2">
+
+                            <div className="grid grid-cols-2 gap-3">
+
+                                {categories.map(cat => (
+
+                                    <label
+                                        key={cat.id}
+                                        className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-blue-50"
+                                    >
+
+                                        <input
+                                            type="checkbox"
+                                            checked={data.category_ids.includes(cat.id)}
+                                            onChange={() => toggleCategory(cat.id)}
+                                        />
+
+                                        <span className="text-sm">
                                             {cat.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </div>
+                                        </span>
+
+                                    </label>
+
+                                ))}
+
                             </div>
+
                         </div>
 
                         {/* Description Field */}
@@ -159,7 +173,7 @@ export default function PropertyTypeForm({
                                     </svg>
                                     SEO Settings
                                 </h3>
-                                
+
                                 {/* Meta Fields Grid */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="col-span-2">
@@ -214,14 +228,12 @@ export default function PropertyTypeForm({
                             <button
                                 type="button"
                                 onClick={() => setData("status", !data.status)}
-                                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100 ${
-                                    data.status ? 'bg-green-500' : 'bg-gray-300'
-                                }`}
+                                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100 ${data.status ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}
                             >
                                 <span
-                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform ${
-                                        data.status ? 'translate-x-8' : 'translate-x-1'
-                                    }`}
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform ${data.status ? 'translate-x-8' : 'translate-x-1'
+                                        }`}
                                 />
                             </button>
                         </div>
