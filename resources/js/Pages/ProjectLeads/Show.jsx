@@ -277,12 +277,12 @@ export default function Show({ auth, lead, followups = [] }) {
                                                 onChange={(e) => updateStatus(e.target.value)}
                                                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23374151' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em' }}
                                             >
-                                                <option value="new">🆕 New</option>
-                                                <option value="contacted">📞 Contacted</option>
-                                                <option value="interested">⭐ Interested</option>
-                                                <option value="site_visit">🏢 Site Visit</option>
-                                                <option value="booked">✅ Booked</option>
-                                                <option value="lost">❌ Lost</option>
+                                                <option value="new"> New</option>
+                                                <option value="contacted"> Contacted</option>
+                                                <option value="interested"> Interested</option>
+                                                <option value="site_visit"> Site Visit</option>
+                                                <option value="booked"> Booked</option>
+                                                <option value="lost"> Lost</option>
                                             </select>
                                         </div>
                                     </div>
