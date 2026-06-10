@@ -176,12 +176,12 @@ export default function Create({
             >
                 <h3 className="text-lg font-semibold flex items-center">
                     <span className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-all duration-200 ${openSection === section
-                        ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-200'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-200'
                         : sectionErrors[section]
                             ? 'bg-red-100 text-red-600 group-hover:bg-red-200'
                             : isCompleted
-                                ? 'bg-green-100 text-green-600 group-hover:bg-green-200'
-                                : 'bg-gray-100 text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                                ? 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200'
+                                : 'bg-gray-100 text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-600'
                         }`}>
                         {sectionIcons[section] || (
                             <span className="text-sm font-bold">
@@ -192,11 +192,11 @@ export default function Create({
                             </span>
                         )}
                     </span>
-                    <span className="text-gray-800 group-hover:text-indigo-600 transition-colors">
+                    <span className="text-gray-800 group-hover:text-emerald-600 transition-colors">
                         {title}
                     </span>
                     {isCompleted && !sectionErrors[section] && (
-                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
@@ -213,12 +213,12 @@ export default function Create({
                     )}
                 </h3>
                 <div className="flex items-center space-x-3">
-                    <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">
+                    <span className="text-xs text-gray-400 group-hover:text-emerald-500 transition-colors">
                         {openSection === section ? 'Click to collapse' : 'Click to expand'}
                     </span>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${openSection === section
-                        ? 'bg-indigo-100 text-indigo-600'
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : 'bg-gray-100 text-gray-400 group-hover:bg-emerald-100 group-hover:text-emerald-600'
                         }`}>
                         <svg
                             className={`w-5 h-5 transition-transform duration-200 ${openSection === section ? 'transform rotate-180' : ''
@@ -268,7 +268,7 @@ export default function Create({
                             </div>
                             <div className="text-right">
                                 <span className="text-sm font-medium text-gray-500">Progress</span>
-                                <div className="text-2xl font-bold text-indigo-600">
+                                <div className="text-2xl font-bold text-emerald-600">
                                     {Math.round(calculateProgress())}%
                                 </div>
                             </div>
@@ -277,14 +277,11 @@ export default function Create({
                         {/* Progress Bar */}
                         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500 ease-out"
+                                className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 transition-all duration-500 ease-out"
                                 style={{ width: `${calculateProgress()}%` }}
                             />
                         </div>
                     </div>
-
-
-
 
                     <div className="px-8 py-6 space-y-4">
 
@@ -292,13 +289,13 @@ export default function Create({
                         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${sectionErrors.project
                             ? "border-red-300 bg-red-50 shadow-md shadow-red-100"
                             : openSection === 'project'
-                                ? "border-indigo-200 shadow-md shadow-indigo-100"
-                                : "border-gray-200 hover:border-indigo-200 hover:shadow-sm"
+                                ? "border-emerald-200 shadow-md shadow-emerald-100"
+                                : "border-gray-200 hover:border-emerald-200 hover:shadow-sm"
                             }`}>
                             <div className={`px-6 py-4 border-b ${sectionErrors.project
                                 ? "bg-red-50 border-red-200"
                                 : openSection === 'project'
-                                    ? "bg-indigo-50 border-indigo-200"
+                                    ? "bg-emerald-50 border-emerald-200"
                                     : "bg-gray-50 border-gray-200"
                                 }`}>
                                 <SectionHeader
@@ -325,13 +322,13 @@ export default function Create({
                         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${sectionErrors.tower
                             ? "border-red-300 bg-red-50 shadow-md shadow-red-100"
                             : openSection === 'tower'
-                                ? "border-indigo-200 shadow-md shadow-indigo-100"
-                                : "border-gray-200 hover:border-indigo-200 hover:shadow-sm"
+                                ? "border-emerald-200 shadow-md shadow-emerald-100"
+                                : "border-gray-200 hover:border-emerald-200 hover:shadow-sm"
                             }`}>
                             <div className={`px-6 py-4 border-b ${sectionErrors.tower
                                 ? "bg-red-50 border-red-200"
                                 : openSection === 'tower'
-                                    ? "bg-indigo-50 border-indigo-200"
+                                    ? "bg-emerald-50 border-emerald-200"
                                     : "bg-gray-50 border-gray-200"
                                 }`}>
                                 <SectionHeader
@@ -356,11 +353,11 @@ export default function Create({
 
                         {/* AMENITIES SECTION - SECTION 3 */}
                         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${openSection === 'amenities'
-                            ? "border-indigo-200 shadow-md shadow-indigo-100"
-                            : "border-gray-200 hover:border-indigo-200 hover:shadow-sm"
+                            ? "border-emerald-200 shadow-md shadow-emerald-100"
+                            : "border-gray-200 hover:border-emerald-200 hover:shadow-sm"
                             }`}>
                             <div className={`px-6 py-4 border-b ${openSection === 'amenities'
-                                ? "bg-indigo-50 border-indigo-200"
+                                ? "bg-emerald-50 border-emerald-200"
                                 : "bg-gray-50 border-gray-200"
                                 }`}>
                                 <SectionHeader
@@ -383,11 +380,11 @@ export default function Create({
 
                         {/* MEDIA SECTION - SECTION 4 */}
                         <div className={`border rounded-xl overflow-hidden transition-all duration-200 ${openSection === 'media'
-                            ? "border-indigo-200 shadow-md shadow-indigo-100"
-                            : "border-gray-200 hover:border-indigo-200 hover:shadow-sm"
+                            ? "border-emerald-200 shadow-md shadow-emerald-100"
+                            : "border-gray-200 hover:border-emerald-200 hover:shadow-sm"
                             }`}>
                             <div className={`px-6 py-4 border-b ${openSection === 'media'
-                                ? "bg-indigo-50 border-indigo-200"
+                                ? "bg-emerald-50 border-emerald-200"
                                 : "bg-gray-50 border-gray-200"
                                 }`}>
                                 <SectionHeader
@@ -418,7 +415,7 @@ export default function Create({
                                 <span>Required fields</span>
                             </div>
                             {validationLoading && (
-                                <div className="flex items-center text-indigo-600">
+                                <div className="flex items-center text-emerald-600">
                                     <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -431,11 +428,11 @@ export default function Create({
                         <button
                             onClick={submitAll}
                             disabled={validationLoading}
-                            className={`px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-xl 
-                                    hover:from-indigo-700 hover:to-indigo-600 transition-all duration-200 
-                                    font-medium shadow-lg shadow-indigo-200 hover:shadow-xl 
-                                    hover:shadow-indigo-300 transform hover:-translate-y-0.5
-                                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+                            className={`px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl 
+                                    hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 
+                                    font-medium shadow-lg shadow-emerald-200 hover:shadow-xl 
+                                    hover:shadow-emerald-300 transform hover:-translate-y-0.5
+                                    focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2
                                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
                                     flex items-center space-x-2`}
                         >
