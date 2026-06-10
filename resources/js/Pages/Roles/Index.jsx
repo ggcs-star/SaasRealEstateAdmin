@@ -123,8 +123,8 @@ export default function Index() {
                     {/* Header */}
                     <div className="mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-indigo-100 rounded-lg">
-                                <Shield className="w-6 h-6 text-indigo-600" />
+                            <div className="p-2 bg-emerald-100 rounded-lg">
+                                <Shield className="w-6 h-6 text-emerald-600" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">
@@ -142,15 +142,15 @@ export default function Index() {
                         <div className="lg:w-1/4">
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-6">
                                 {/* Panel Header */}
-                                <div className="bg-gradient-to-r from-indigo-50 to-white px-4 py-4 border-b border-gray-200">
+                                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-4 border-b border-gray-200">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Users className="w-5 h-5 text-indigo-600" />
+                                            <Users className="w-5 h-5 text-emerald-600" />
                                             <h2 className="font-semibold text-gray-900">Roles</h2>
                                         </div>
                                         <Link
                                             href="/roles/create"
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
                                         >
                                             <UserPlus className="w-4 h-4" />
                                             New Role
@@ -170,7 +170,7 @@ export default function Index() {
                                                 onClick={() => selectRole(role)}
                                                 className={`w-full text-left p-3 rounded-lg transition-all duration-200 group ${
                                                     selectedRole?._id === role._id
-                                                        ? 'bg-indigo-600 shadow-lg shadow-indigo-200'
+                                                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 shadow-lg shadow-emerald-200'
                                                         : 'hover:bg-gray-50'
                                                 }`}
                                             >
@@ -178,7 +178,7 @@ export default function Index() {
                                                     <div className="flex items-center gap-2 min-w-0">
                                                         <div className={`p-1.5 rounded-lg ${
                                                             selectedRole?._id === role._id
-                                                                ? 'bg-indigo-500'
+                                                                ? 'bg-white/20'
                                                                 : 'bg-gray-100 group-hover:bg-gray-200'
                                                         }`}>
                                                             <Shield className={`w-4 h-4 ${
@@ -210,7 +210,7 @@ export default function Index() {
                                                 {role.description && (
                                                     <p className={`text-xs mt-1 truncate ${
                                                         selectedRole?._id === role._id
-                                                            ? 'text-indigo-100'
+                                                            ? 'text-emerald-100'
                                                             : 'text-gray-500'
                                                     }`}>
                                                         {role.description}
@@ -237,11 +237,11 @@ export default function Index() {
                                 {selectedRole ? (
                                     <>
                                         {/* Panel Header */}
-                                        <div className="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+                                        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-200">
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <Key className="w-5 h-5 text-indigo-600" />
+                                                        <Key className="w-5 h-5 text-emerald-600" />
                                                         <h2 className="text-lg font-semibold text-gray-900">
                                                             Permissions for {selectedRole.name}
                                                         </h2>
@@ -253,7 +253,7 @@ export default function Index() {
                                                 <button
                                                     onClick={submit}
                                                     disabled={processing}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                                                 >
                                                     {processing ? (
                                                         <>
@@ -271,10 +271,10 @@ export default function Index() {
                                         </div>
 
                                         {/* Selected Role Info */}
-                                        <div className="px-6 py-4 bg-indigo-50/50 border-b border-indigo-100">
+                                        <div className="px-6 py-4 bg-emerald-50/50 border-b border-emerald-100">
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <span className="text-sm text-gray-600">Selected Role:</span>
-                                                <span className="px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-full">
+                                                <span className="px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-medium rounded-full">
                                                     {selectedRole.name}
                                                 </span>
                                                 <span className="text-sm text-gray-500 ml-auto">
@@ -293,7 +293,7 @@ export default function Index() {
                                                         placeholder="Search permissions..."
                                                         value={search}
                                                         onChange={(e) => setSearch(e.target.value)}
-                                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                                     />
                                                 </div>
                                                 
@@ -302,7 +302,7 @@ export default function Index() {
                                                     <select
                                                         value={categoryFilter}
                                                         onChange={(e) => setCategoryFilter(e.target.value)}
-                                                        className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white"
+                                                        className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
                                                     >
                                                         {categories.map(cat => (
                                                             <option key={cat} value={cat}>
@@ -322,12 +322,12 @@ export default function Index() {
                                                     className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                                                 >
                                                     {allSelected ? (
-                                                        <CheckSquare className="w-4 h-4 text-indigo-600" />
+                                                        <CheckSquare className="w-4 h-4 text-emerald-600" />
                                                     ) : someSelected ? (
                                                         <div className="relative">
                                                             <Square className="w-4 h-4 text-gray-400" />
                                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                                <div className="w-2 h-2 bg-indigo-600 rounded-sm"></div>
+                                                                <div className="w-2 h-2 bg-emerald-600 rounded-sm"></div>
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -364,7 +364,7 @@ export default function Index() {
                                                                 </div>
                                                                 <button
                                                                     onClick={() => toggleCategory(category, perms)}
-                                                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                                                                    className="text-xs text-emerald-600 hover:text-emerald-800 font-medium"
                                                                 >
                                                                     {perms.every(p => data.permissions.includes(p)) 
                                                                         ? 'Deselect All' 
@@ -381,7 +381,7 @@ export default function Index() {
                                                                             key={p}
                                                                             className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                                                                                 isSelected
-                                                                                    ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                                                                    ? 'border-emerald-500 bg-emerald-50 shadow-sm'
                                                                                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                                                             }`}
                                                                         >
@@ -389,23 +389,23 @@ export default function Index() {
                                                                                 type="checkbox"
                                                                                 checked={isSelected}
                                                                                 onChange={() => togglePermission(p)}
-                                                                                className="mt-0.5 accent-indigo-600"
+                                                                                className="mt-0.5 accent-emerald-600"
                                                                             />
                                                                             <div className="flex-1 min-w-0">
                                                                                 <div className="flex items-center gap-1 mb-1">
                                                                                     {isSelected ? (
-                                                                                        <Lock className="w-3 h-3 text-indigo-600" />
+                                                                                        <Lock className="w-3 h-3 text-emerald-600" />
                                                                                     ) : (
                                                                                         <Unlock className="w-3 h-3 text-gray-400" />
                                                                                     )}
                                                                                     <span className={`text-xs font-medium truncate ${
-                                                                                        isSelected ? 'text-indigo-700' : 'text-gray-500'
+                                                                                        isSelected ? 'text-emerald-700' : 'text-gray-500'
                                                                                     }`}>
                                                                                         {category}
                                                                                     </span>
                                                                                 </div>
                                                                                 <p className={`text-sm font-medium truncate ${
-                                                                                    isSelected ? 'text-indigo-900' : 'text-gray-700'
+                                                                                    isSelected ? 'text-emerald-900' : 'text-gray-700'
                                                                                 }`}>
                                                                                     {p.split('.').slice(1).join('.') || p}
                                                                                 </p>
@@ -440,7 +440,7 @@ export default function Index() {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                                                     <span className="text-xs text-gray-500">
                                                         {Math.round((data.permissions.length / permissionsList.length) * 100)}% configured
                                                     </span>
@@ -451,16 +451,16 @@ export default function Index() {
                                 ) : (
                                     // Empty State
                                     <div className="text-center py-20 px-6">
-                                        <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-50 rounded-full mb-4">
-                                            <Shield className="w-10 h-10 text-indigo-400" />
+                                        <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-4">
+                                            <Shield className="w-10 h-10 text-emerald-400" />
                                         </div>
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">
                                             No Role Selected
                                         </h3>
-                                        <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+                                        <p className="text-sm text-gray-500 max-sm mx-auto mb-6">
                                             Please select a role from the left panel to view and manage its permissions
                                         </p>
-                                        <div className="flex items-center justify-center gap-2 text-sm text-indigo-600">
+                                        <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
                                             <ChevronRight className="w-4 h-4" />
                                             <span>Select a role to get started</span>
                                         </div>

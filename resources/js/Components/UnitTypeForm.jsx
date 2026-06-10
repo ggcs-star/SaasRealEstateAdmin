@@ -31,7 +31,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
             {/* Modal Container */}
             <div className="bg-white w-[650px] rounded-2xl shadow-2xl animate-slideUp overflow-hidden">
                 {/* Modal Header with Gradient */}
-                <div className="relative bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-800 px-6 py-5">
+                <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 px-6 py-5">
                     {/* Decorative Elements */}
                     <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 animate-pulse"></div>
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-12 -mb-12"></div>
@@ -53,7 +53,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                 <h2 className="text-xl font-bold text-white">
                                     {unitType ? "Edit Unit Type" : "Create New Unit Type"}
                                 </h2>
-                                <p className="text-sm text-indigo-100 mt-0.5 flex items-center">
+                                <p className="text-sm text-emerald-100 mt-0.5 flex items-center">
                                     <span className="w-1 h-1 bg-white/60 rounded-full mr-2"></span>
                                     {unitType ? "Update unit configuration below" : "Configure new unit specifications"}
                                 </p>
@@ -80,7 +80,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
@@ -88,12 +88,12 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                     type="text"
                                     value={data.name}
                                     onChange={(e) => setData("name", e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none bg-gray-50/50 focus:bg-white"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none bg-gray-50/50 focus:bg-white"
                                     placeholder="e.g., bhk-1, bhk-2"
                                 />
                                 {data.name && (
                                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                                     </div>
                                 )}
                             </div>
@@ -106,7 +106,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path>
                                     </svg>
                                 </div>
@@ -114,13 +114,13 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                     type="number"
                                     value={data.bhk}
                                     onChange={(e) => setData("bhk", e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none bg-gray-50/50 focus:bg-white"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none bg-gray-50/50 focus:bg-white"
                                     placeholder="e.g., 1, 2, 3"
                                     min="0"
                                     step="1"
                                 />
                                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-                                    <span className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">BHK</span>
+                                    <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">BHK</span>
                                 </div>
                             </div>
                         </div>
@@ -132,7 +132,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3 top-3">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path>
                                     </svg>
                                 </div>
@@ -140,7 +140,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                     value={data.description}
                                     onChange={(e) => setData("description", e.target.value)}
                                     rows="4"
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none resize-none bg-gray-50/50 focus:bg-white"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none resize-none bg-gray-50/50 focus:bg-white"
                                     placeholder="Describe this unit type, its features, and specifications..."
                                 />
                                 <div className="absolute bottom-3 right-3 text-xs text-gray-400">
@@ -151,11 +151,11 @@ export default function UnitTypeForm({ unitType, closeModal }) {
 
                         {/* SEO Section with Accent Border */}
                         <div className="relative">
-                            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
+                            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
                             <div className="pl-3">
                                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <div className="p-1 bg-indigo-100 rounded-lg mr-2">
-                                        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="p-1 bg-emerald-100 rounded-lg mr-2">
+                                        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                                         </svg>
                                     </div>
@@ -169,7 +169,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                         <input
                                             value={data.meta_title}
                                             onChange={(e) => setData("meta_title", e.target.value)}
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-sm bg-gray-50/50 focus:bg-white"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm bg-gray-50/50 focus:bg-white"
                                             placeholder="Enter meta title for SEO"
                                         />
                                     </div>
@@ -179,7 +179,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                             value={data.meta_description}
                                             onChange={(e) => setData("meta_description", e.target.value)}
                                             rows="2"
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-sm resize-none bg-gray-50/50 focus:bg-white"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm resize-none bg-gray-50/50 focus:bg-white"
                                             placeholder="Enter meta description for search engines"
                                         />
                                     </div>
@@ -188,7 +188,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                                         <input
                                             value={data.meta_keywords}
                                             onChange={(e) => setData("meta_keywords", e.target.value)}
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-sm bg-gray-50/50 focus:bg-white"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm bg-gray-50/50 focus:bg-white"
                                             placeholder="keyword1, keyword2, keyword3"
                                         />
                                     </div>
@@ -199,7 +199,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                         {/* Status Toggle with Modern Switch */}
                         <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
                             <div className="flex items-center space-x-3">
-                                <div className={`p-2 rounded-lg transition-all duration-300 ${data.status ? 'bg-green-500 shadow-lg shadow-green-200' : 'bg-gray-300'}`}>
+                                <div className={`p-2 rounded-lg transition-all duration-300 ${data.status ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-gray-300'}`}>
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         {data.status ? (
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -216,8 +216,8 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                             <button
                                 type="button"
                                 onClick={() => setData("status", !data.status)}
-                                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100 ${
-                                    data.status ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'
+                                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-100 ${
+                                    data.status ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'
                                 }`}
                             >
                                 <span
@@ -229,13 +229,13 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                         </div>
 
                         {/* Preview Card */}
-                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200/50">
+                        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200/50">
                             <div className="flex items-center space-x-2 mb-2">
-                                <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
-                                <span className="text-xs font-medium text-indigo-600">Preview</span>
+                                <span className="text-xs font-medium text-emerald-600">Preview</span>
                             </div>
                             <div className="text-sm text-gray-600">
                                 <span className="font-semibold text-gray-800">{data.name || "Unit Name"}</span> - 
@@ -256,7 +256,7 @@ export default function UnitTypeForm({ unitType, closeModal }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="relative px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group"
+                            className="relative px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group"
                         >
                             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
                             <span className="relative z-10 flex items-center">

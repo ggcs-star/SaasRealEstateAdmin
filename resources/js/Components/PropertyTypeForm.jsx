@@ -15,7 +15,7 @@ export default function PropertyTypeForm({
         meta_keywords: propertyType?.meta_keywords || "",
         status: propertyType?.status ?? true
     });
-    console.log(data.category_ids)
+
     const submit = (e) => {
         e.preventDefault();
 
@@ -29,8 +29,8 @@ export default function PropertyTypeForm({
             });
         }
     };
-    const toggleCategory = (id) => {
 
+    const toggleCategory = (id) => {
         let updated = [...data.category_ids];
 
         if (updated.includes(id)) {
@@ -47,7 +47,7 @@ export default function PropertyTypeForm({
             {/* Modal Container with Animation */}
             <div className="bg-white w-[650px] rounded-2xl shadow-2xl animate-slideUp overflow-hidden">
                 {/* Modal Header with Gradient */}
-                <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 px-6 py-5">
+                <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 px-6 py-5">
                     {/* Decorative Elements */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-8 -mb-8"></div>
@@ -69,7 +69,7 @@ export default function PropertyTypeForm({
                                 <h2 className="text-xl font-bold text-white">
                                     {propertyType ? "Edit Property Type" : "Create New Property Type"}
                                 </h2>
-                                <p className="text-sm text-blue-100 mt-0.5">
+                                <p className="text-sm text-emerald-100 mt-0.5">
                                     {propertyType ? "Update the details below" : "Fill in the information below"}
                                 </p>
                             </div>
@@ -95,7 +95,7 @@ export default function PropertyTypeForm({
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
@@ -103,7 +103,7 @@ export default function PropertyTypeForm({
                                     type="text"
                                     value={data.name}
                                     onChange={(e) => setData("name", e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none"
                                     placeholder="e.g., Apartment, Villa, Office"
                                 />
                             </div>
@@ -116,30 +116,23 @@ export default function PropertyTypeForm({
                             </label>
 
                             <div className="grid grid-cols-2 gap-3">
-
                                 {categories.map(cat => (
-
                                     <label
                                         key={cat.id}
-                                        className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-blue-50"
+                                        className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-emerald-50 transition-colors"
                                     >
-
                                         <input
                                             type="checkbox"
                                             checked={data.category_ids.includes(cat.id)}
                                             onChange={() => toggleCategory(cat.id)}
+                                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                         />
-
                                         <span className="text-sm">
                                             {cat.name}
                                         </span>
-
                                     </label>
-
                                 ))}
-
                             </div>
-
                         </div>
 
                         {/* Description Field */}
@@ -149,7 +142,7 @@ export default function PropertyTypeForm({
                             </label>
                             <div className="relative">
                                 <div className="absolute left-3 top-3">
-                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"></path>
                                     </svg>
                                 </div>
@@ -157,7 +150,7 @@ export default function PropertyTypeForm({
                                     value={data.description}
                                     onChange={(e) => setData("description", e.target.value)}
                                     rows="4"
-                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none resize-none"
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none resize-none"
                                     placeholder="Describe this property type..."
                                 />
                             </div>
@@ -165,10 +158,10 @@ export default function PropertyTypeForm({
 
                         {/* Meta Section with Accent */}
                         <div className="relative">
-                            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
                             <div className="pl-3">
                                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <svg className="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 mr-1.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                                     </svg>
                                     SEO Settings
@@ -181,7 +174,7 @@ export default function PropertyTypeForm({
                                         <input
                                             value={data.meta_title}
                                             onChange={(e) => setData("meta_title", e.target.value)}
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm"
                                             placeholder="Enter meta title"
                                         />
                                     </div>
@@ -191,7 +184,7 @@ export default function PropertyTypeForm({
                                             value={data.meta_description}
                                             onChange={(e) => setData("meta_description", e.target.value)}
                                             rows="2"
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm resize-none"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm resize-none"
                                             placeholder="Enter meta description"
                                         />
                                     </div>
@@ -200,7 +193,7 @@ export default function PropertyTypeForm({
                                         <input
                                             value={data.meta_keywords}
                                             onChange={(e) => setData("meta_keywords", e.target.value)}
-                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm"
+                                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none text-sm"
                                             placeholder="keyword1, keyword2, keyword3"
                                         />
                                     </div>
@@ -211,7 +204,7 @@ export default function PropertyTypeForm({
                         {/* Status Toggle with Modern Switch */}
                         <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
                             <div className="flex items-center space-x-3">
-                                <div className={`p-2 rounded-lg transition-colors ${data.status ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                <div className={`p-2 rounded-lg transition-colors ${data.status ? 'bg-emerald-500' : 'bg-gray-300'}`}>
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         {data.status ? (
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -228,7 +221,7 @@ export default function PropertyTypeForm({
                             <button
                                 type="button"
                                 onClick={() => setData("status", !data.status)}
-                                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100 ${data.status ? 'bg-green-500' : 'bg-gray-300'
+                                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-emerald-100 ${data.status ? 'bg-emerald-500' : 'bg-gray-300'
                                     }`}
                             >
                                 <span
@@ -251,7 +244,7 @@ export default function PropertyTypeForm({
                         <button
                             type="submit"
                             disabled={processing}
-                            className="relative px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-xl shadow-lg shadow-green-200 hover:shadow-xl hover:shadow-green-300 hover:from-green-700 hover:to-green-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-green-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group"
+                            className="relative px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group"
                         >
                             <span className="relative z-10 flex items-center">
                                 {processing ? (
