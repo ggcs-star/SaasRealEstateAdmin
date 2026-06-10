@@ -232,12 +232,7 @@ export default function Index({ auth, leads }) {
                                                     >
                                                         <Eye className="w-5 h-5 group-hover/view:scale-110 transition-transform" />
                                                     </Link>
-                                                    <button className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200 hover:scale-110 group/edit" title="Edit">
-                                                        <Edit className="w-5 h-5 group-hover/edit:rotate-12 transition-transform" />
-                                                    </button>
-                                                    <button className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all duration-200 hover:scale-110 group/delete" title="Delete">
-                                                        <Trash2 className="w-5 h-5 group-hover/delete:scale-110 transition-transform" />
-                                                    </button>
+                                                    
                                                 </div>
                                             </td>
                                         </tr>
