@@ -65,8 +65,8 @@ export default function Index() {
                     {/* Header Section */}
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-indigo-100 rounded-lg">
-                                <Users className="w-6 h-6 text-indigo-600" />
+                            <div className="p-2 bg-emerald-100 rounded-lg">
+                                <Users className="w-6 h-6 text-emerald-600" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">
@@ -87,8 +87,8 @@ export default function Index() {
                                     <p className="text-sm font-medium text-gray-500">Total Users</p>
                                     <p className="text-2xl font-bold text-gray-900 mt-1">{totalUsers}</p>
                                 </div>
-                                <div className="p-3 bg-indigo-50 rounded-lg">
-                                    <Users className="w-6 h-6 text-indigo-600" />
+                                <div className="p-3 bg-emerald-50 rounded-lg">
+                                    <Users className="w-6 h-6 text-emerald-600" />
                                 </div>
                             </div>
                         </div>
@@ -97,10 +97,10 @@ export default function Index() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-500">With Roles</p>
-                                    <p className="text-2xl font-bold text-green-600 mt-1">{usersWithRoles}</p>
+                                    <p className="text-2xl font-bold text-emerald-600 mt-1">{usersWithRoles}</p>
                                 </div>
-                                <div className="p-3 bg-green-50 rounded-lg">
-                                    <Shield className="w-6 h-6 text-green-600" />
+                                <div className="p-3 bg-emerald-50 rounded-lg">
+                                    <Shield className="w-6 h-6 text-emerald-600" />
                                 </div>
                             </div>
                         </div>
@@ -120,9 +120,9 @@ export default function Index() {
 
                     {/* Assignment Form Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                        <div className="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+                        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-200">
                             <div className="flex items-center gap-2">
-                                <Award className="w-5 h-5 text-indigo-600" />
+                                <Award className="w-5 h-5 text-emerald-600" />
                                 <h2 className="text-lg font-semibold text-gray-900">
                                     Assign New Role
                                 </h2>
@@ -142,7 +142,7 @@ export default function Index() {
                                             <select
                                                 value={data.user_id}
                                                 onChange={e => setData('user_id', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white ${
+                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${
                                                     errors.user_id ? 'border-red-300' : 'border-gray-300'
                                                 }`}
                                             >
@@ -170,7 +170,7 @@ export default function Index() {
                                             <select
                                                 value={data.role}
                                                 onChange={e => setData('role', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white ${
+                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${
                                                     errors.role ? 'border-red-300' : 'border-gray-300'
                                                 }`}
                                             >
@@ -193,7 +193,7 @@ export default function Index() {
                                         <button
                                             type="submit"
                                             disabled={processing}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                                         >
                                             {processing ? (
                                                 <>
@@ -223,7 +223,7 @@ export default function Index() {
                                     <h2 className="text-lg font-semibold text-gray-900">
                                         Users List
                                     </h2>
-                                    <span className="ml-2 px-2.5 py-0.5 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">
+                                    <span className="ml-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
                                         {filteredUsers.length} users
                                     </span>
                                 </div>
@@ -237,7 +237,7 @@ export default function Index() {
                                             placeholder="Search users..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                                         />
                                     </div>
 
@@ -247,7 +247,7 @@ export default function Index() {
                                         <select
                                             value={roleFilter}
                                             onChange={(e) => setRoleFilter(e.target.value)}
-                                            className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white text-sm"
+                                            className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white text-sm"
                                         >
                                             <option value="all">All Users</option>
                                             <option value="assigned">With Role</option>
@@ -285,8 +285,8 @@ export default function Index() {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10">
-                                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                                                                <span className="text-indigo-600 font-medium text-sm">
+                                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                                                                <span className="text-emerald-600 font-medium text-sm">
                                                                     {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                                                                 </span>
                                                             </div>
@@ -309,7 +309,7 @@ export default function Index() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {user.role ? (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                                                             <Shield className="w-3 h-3 mr-1" />
                                                             {user.role}
                                                         </span>
@@ -321,7 +321,7 @@ export default function Index() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {user.role ? (
-                                                        <span className="inline-flex items-center text-green-600">
+                                                        <span className="inline-flex items-center text-emerald-600">
                                                             <CheckCircle className="w-4 h-4 mr-1" />
                                                             <span className="text-sm">Active</span>
                                                         </span>
