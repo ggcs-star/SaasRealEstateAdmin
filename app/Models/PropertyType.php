@@ -15,7 +15,7 @@ class PropertyType extends Model
     protected $fillable = [
         'created_by_id',
         'created_by_type',
-        'category_id',
+        'category_ids',
         'name',
         'slug',
         'description',
@@ -28,10 +28,12 @@ class PropertyType extends Model
 
     protected $casts = [
         'meta_data' => 'array',
+       
         'status' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+   
 
     protected static function boot()
     {

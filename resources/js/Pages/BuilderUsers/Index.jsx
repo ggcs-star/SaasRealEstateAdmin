@@ -35,8 +35,8 @@ export default function Index({ auth, users }) {
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Builder Users</h2>
-                    <p className="text-gray-600 mt-1">Manage your builder users and their details</p>
+                    <h2 className="text-3xl font-bold text-gray-800">Builder </h2>
+                    <p className="text-gray-600 mt-1">Manage your builder  and their details</p>
                 </div>
                 
                 <button
@@ -46,7 +46,7 @@ export default function Index({ auth, users }) {
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Add New User
+                    Add New 
                 </button>
             </div>
 
@@ -216,7 +216,7 @@ export default function Index({ auth, users }) {
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div className="flex justify-between items-center border-b pb-4 mb-4">
                                     <h3 className="text-2xl font-bold text-gray-900">
-                                        {selectedUser ? "Edit Builder User" : "Create New Builder User"}
+                                        {selectedUser ? "Edit Builder " : "Create New Builder "}
                                     </h3>
                                     <button
                                         onClick={handleClose}

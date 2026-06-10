@@ -153,12 +153,12 @@ export default function Authenticated({ user, header, children }) {
                             permission="view builder"
                         />
                         
-                        <SidebarItem
+                        {/* <SidebarItem
                             href="promoters.index"
                             icon={Megaphone}
                             label="Promoters"
                             permission="view promoters"
-                        />
+                        /> */}
                         <SidebarItem
                             href="amenities.index"
                             icon={Star}
@@ -217,7 +217,7 @@ export default function Authenticated({ user, header, children }) {
                 </nav>
 
                 {/* User Profile & Logout */}
-                <div className="p-4 border-t border-sky-700/50 mt-auto">
+                {/* <div className="p-4 border-t border-sky-700/50 mt-auto">
                     <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-sky-700/30 rounded-lg">
                         <div className="h-10 w-10 rounded-full bg-sky-600 flex items-center justify-center text-white font-bold text-lg border-2 border-sky-400">
                             {user?.name?.charAt(0).toUpperCase()}
@@ -237,7 +237,7 @@ export default function Authenticated({ user, header, children }) {
                         <LogOut size={18} />
                         <span>Sign Out</span>
                     </Link>
-                </div>
+                </div> */}
             </aside>
 
             {/* Mobile Menu Overlay */}
