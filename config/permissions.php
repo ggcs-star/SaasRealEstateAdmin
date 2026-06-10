@@ -59,6 +59,11 @@ return [
             'edit unit type',
             'delete unit type',
         ],
+        'project leads' => [
+            'view project leads',
+            'edit project leads',
+            'add project lead followup',
+        ],
 
     ],
 
@@ -118,6 +123,11 @@ return [
         'unit-types.store' => 'add unit type',
         'unit-types.update' => 'edit unit type',
         'unit-types.destroy' => 'delete unit type',
+
+        'project-leads.index' => 'view project leads',
+        'project-leads.remark' => 'edit project leads',
+        'lead-followup.store' => 'add project lead followup',
+
     ],
 
 ];
