@@ -119,6 +119,12 @@ Route::middleware(['auth', 'check.permission'])->group(function () {
     Route::post('/project-leads/remark', [ProjectLeadController::class, 'updateRemark'])->name('project-leads.remark');
     Route::post('/lead-followup', [ProjectLeadController::class, 'addFollowup']);
     
+ 
+
+Route::post(
+    '/lead-followup/store',
+    [ProjectLeadController::class,'addFollowup']
+)->name('lead-followup.store');
 });
 
 

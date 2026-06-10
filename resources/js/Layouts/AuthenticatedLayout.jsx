@@ -19,7 +19,7 @@ export default function Authenticated({ user, header, children }) {
         userManagement: true,
         analytics: false,
     });
-    
+
     const { auth } = usePage().props;
     const permissions = auth?.permissions || [];
 
@@ -50,8 +50,8 @@ export default function Authenticated({ user, header, children }) {
             <Link
                 href={route(href)}
                 className={`group flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 text-sm
-                    ${active 
-                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20' 
+                    ${active
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20'
                         : 'text-slate-600 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700'
                     }
                 `}
@@ -72,8 +72,8 @@ export default function Authenticated({ user, header, children }) {
 
     const SidebarSection = ({ title, icon: Icon, section, children }) => {
         const hasVisibleChildren = React.Children.toArray(children).some(
-            child => child.type === SidebarItem && !child.props.permission || 
-                    (child.props.permission && permissions.includes(child.props.permission))
+            child => child.type === SidebarItem && !child.props.permission ||
+                (child.props.permission && permissions.includes(child.props.permission))
         );
 
         if (!hasVisibleChildren) return null;
@@ -88,12 +88,12 @@ export default function Authenticated({ user, header, children }) {
                         {Icon && <Icon size={14} className="group-hover:text-emerald-600 transition-colors" />}
                         <span>{title}</span>
                     </div>
-                    <ChevronDown 
-                        size={14} 
+                    <ChevronDown
+                        size={14}
                         className={`transition-all duration-300 ${expandedSections[section] ? 'rotate-180 text-emerald-600' : 'text-slate-400'}`}
                     />
                 </button>
-                
+
                 {expandedSections[section] && (
                     <div className="mt-2 space-y-1 pl-2">
                         {children}
@@ -143,75 +143,81 @@ export default function Authenticated({ user, header, children }) {
                         />
                     </div>
 
- 
 
-<SidebarItem
-    href="builder.index"
-    icon={HardHat}
-    label="Builders"
-    permission="view builder"
+
+                    <SidebarItem
+                        href="builder.index"
+                        icon={HardHat}
+                        label="Builders"
+                        permission="view builder"
+                    />
+
+                    <SidebarItem
+                        href="amenities.index"
+                        icon={Star}
+                        label="Amenities"
+                        permission="view amenities"
+                    />
+
+                    <SidebarItem
+                        href="categories.index"
+                        icon={Grid}
+                        label="Categories"
+                        permission="view categories"
+                    />
+
+                    <SidebarItem
+                        href="property-types.index"
+                        icon={Home}
+                        label="Property Types"
+                        permission="view property types"
+                    />
+
+                    <SidebarItem
+                        href="unit-types.index"
+                        icon={Grid}
+                        label="Unit Types"
+                        permission="view unit types"
+                    />
+
+                    <SidebarItem
+                        href="projects.index"
+                        icon={Building}
+                        label="Projects"
+                        permission="view project"
+                    />
+                   <SidebarItem
+    href="project-leads.index"
+    icon={Briefcase}
+    label="Project Leads"
+    permission="view project leads"
 />
 
-<SidebarItem
-    href="amenities.index"
-    icon={Star}
-    label="Amenities"
-    permission="view amenities"
-/>
-
-<SidebarItem
-    href="categories.index"
-    icon={Grid}
-    label="Categories"
-    permission="view categories"
-/>
-
-<SidebarItem
-    href="property-types.index"
-    icon={Home}
-    label="Property Types"
-    permission="view property types"
-/>
-
-<SidebarItem
-    href="unit-types.index"
-    icon={Grid}
-    label="Unit Types"
-    permission="view unit types"
-/>
-
-<SidebarItem
-    href="projects.index"
-    icon={Building}
-    label="Projects"
-    permission="view project"
-/>
-
-                 
 
 
-<SidebarItem
-    href="users.index"
-    icon={Users}
-    label="Users"
-    permission="view users"
-/>
 
-<SidebarItem
-    href="roles.index"
-    icon={ShieldCheck}
-    label="Roles & Permissions"
-    permission="view roles"
-/>
+                    <SidebarItem
+                        href="users.index"
+                        icon={Users}
+                        label="Users"
+                        permission="view users"
+                    />
+
+                    <SidebarItem
+                        href="roles.index"
+                        icon={ShieldCheck}
+                        label="Roles & Permissions"
+                        permission="view roles"
+                    />
                 </nav>
 
                 {/* User Profile & Stats */}
-            
+
             </aside>
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/30 backdrop-blur-sm z-20 md:hidden"
                     onClick={() => setMobileMenuOpen(false)}
                 />
@@ -229,19 +235,19 @@ export default function Authenticated({ user, header, children }) {
                         >
                             <Menu size={20} />
                         </button>
-                        
+
                         {/* Search Bar */}
                         <div className="hidden md:flex items-center max-w-md">
                             <div className="relative">
                                 <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                <input 
-                                    type="text" 
-                                    placeholder="Search properties, projects, or clients..." 
+                                <input
+                                    type="text"
+                                    placeholder="Search properties, projects, or clients..."
                                     className="pl-10 pr-4 py-2 w-80 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                                 />
                             </div>
                         </div>
-                        
+
                         {/* Page Title */}
                         {header && (
                             <div className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent ml-4">
@@ -252,7 +258,7 @@ export default function Authenticated({ user, header, children }) {
 
                     {/* Right Side Header Items */}
                     <div className="flex items-center gap-2 md:gap-4">
-                      
+
 
                         {/* Notifications */}
                         <button className="relative p-2 text-slate-600 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-xl transition-all duration-300">
@@ -278,11 +284,11 @@ export default function Authenticated({ user, header, children }) {
                             {/* Dropdown Menu */}
                             {showingNavigationDropdown && (
                                 <>
-                                    <div 
+                                    <div
                                         className="fixed inset-0 z-40"
                                         onClick={() => setShowingNavigationDropdown(false)}
                                     />
-                                    
+
                                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl py-2 border border-slate-100 z-50">
                                         <div className="px-4 py-3 border-b border-slate-100">
                                             <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
@@ -291,7 +297,7 @@ export default function Authenticated({ user, header, children }) {
                                                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Property Expert</span>
                                             </div>
                                         </div>
-                                        
+
                                         <Link
                                             href={route('profile.edit')}
                                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300"
@@ -300,7 +306,7 @@ export default function Authenticated({ user, header, children }) {
                                             <UserCog size={16} />
                                             Profile Settings
                                         </Link>
-                                        
+
                                         <Link
                                             href="#"
                                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300"
@@ -309,7 +315,7 @@ export default function Authenticated({ user, header, children }) {
                                             <Building size={16} />
                                             My Properties
                                         </Link>
-                                        
+
                                         <Link
                                             href="#"
                                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300"
@@ -319,9 +325,9 @@ export default function Authenticated({ user, header, children }) {
                                             Messages
                                             <span className="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">3</span>
                                         </Link>
-                                        
+
                                         <div className="border-t border-slate-200 my-2"></div>
-                                        
+
                                         <Link
                                             href={route('logout')}
                                             method="post"
