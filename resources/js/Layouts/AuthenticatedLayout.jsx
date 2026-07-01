@@ -186,14 +186,32 @@ export default function Authenticated({ user, header, children }) {
                         label="Projects"
                         permission="view project"
                     />
-                   <SidebarItem
-    href="project-leads.index"
-    icon={Briefcase}
-    label="Project Leads"
-    permission="view project leads"
-/>
+                    <SidebarItem
+                        href="project-leads.index"
+                        icon={Briefcase}
+                        label="Project Leads"
+                        permission="view project leads"
+                    />
 
+                    <SidebarItem
+                        href="customers.index"
+                        icon={Briefcase}
+                        label="Customers"
+                        permission="view customers"
+                    />
+                    <SidebarItem
+                        href="channel-partners.index"
+                        icon={Briefcase}
+                        label="Channel Partners"
+                        permission="view channel partners"
+                    />
 
+                    <SidebarItem
+                        href="bookings.index"
+                        icon={Calendar}
+                        label="Bookings"
+                        permission="view bookings"
+                    />
 
 
                     <SidebarItem
@@ -226,34 +244,34 @@ export default function Authenticated({ user, header, children }) {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden w-full">
                 {/* Header */}
-<header className="relative z-40 bg-white/80 backdrop-blur-md shadow-sm h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200/50">                    <div className="flex items-center gap-3">
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setMobileMenuOpen(true)}
-                            className="md:hidden p-2 text-slate-600 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-xl transition-all duration-300"
-                        >
-                            <Menu size={20} />
-                        </button>
+                <header className="relative z-40 bg-white/80 backdrop-blur-md shadow-sm h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200/50">                    <div className="flex items-center gap-3">
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setMobileMenuOpen(true)}
+                        className="md:hidden p-2 text-slate-600 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-xl transition-all duration-300"
+                    >
+                        <Menu size={20} />
+                    </button>
 
-                        {/* Search Bar */}
-                        <div className="hidden md:flex items-center max-w-md">
-                            <div className="relative">
-                                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search properties, projects, or clients..."
-                                    className="pl-10 pr-4 py-2 w-80 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                                />
-                            </div>
+                    {/* Search Bar */}
+                    <div className="hidden md:flex items-center max-w-md">
+                        <div className="relative">
+                            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search properties, projects, or clients..."
+                                className="pl-10 pr-4 py-2 w-80 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                            />
                         </div>
-
-                        {/* Page Title */}
-                        {header && (
-                            <div className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent ml-4">
-                                {header}
-                            </div>
-                        )}
                     </div>
+
+                    {/* Page Title */}
+                    {header && (
+                        <div className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent ml-4">
+                            {header}
+                        </div>
+                    )}
+                </div>
 
                     {/* Right Side Header Items */}
                     <div className="flex items-center gap-2 md:gap-4">
@@ -283,18 +301,18 @@ export default function Authenticated({ user, header, children }) {
                             {/* Dropdown Menu */}
                             {showingNavigationDropdown && (
                                 <>
-                                   <div
-    className="fixed inset-0"
-    onClick={() => setShowingNavigationDropdown(false)}
-/>
+                                    <div
+                                        className="fixed inset-0"
+                                        onClick={() => setShowingNavigationDropdown(false)}
+                                    />
 
-<div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl py-2 border border-slate-100 z-[60]">                                        <div className="px-4 py-3 border-b border-slate-100">
-                                            <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
-                                            <p className="text-xs text-slate-500 mt-1">{user?.email}</p>
-                                            <div className="mt-2 flex items-center gap-2 text-xs">
-                                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Property Expert</span>
-                                            </div>
+                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl py-2 border border-slate-100 z-[60]">                                        <div className="px-4 py-3 border-b border-slate-100">
+                                        <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
+                                        <p className="text-xs text-slate-500 mt-1">{user?.email}</p>
+                                        <div className="mt-2 flex items-center gap-2 text-xs">
+                                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Property Expert</span>
                                         </div>
+                                    </div>
 
                                         <Link
                                             href={route('profile.edit')}
@@ -344,9 +362,9 @@ export default function Authenticated({ user, header, children }) {
                 </header>
 
                 {/* Page Content */}
-<main className="relative z-0 flex-1 overflow-y-auto p-4 md:p-6">                    <div className="max-w-7xl mx-auto">
-                        {children}
-                    </div>
+                <main className="relative z-0 flex-1 overflow-y-auto p-4 md:p-6">                    <div className="max-w-7xl mx-auto">
+                    {children}
+                </div>
                 </main>
             </div>
         </div>

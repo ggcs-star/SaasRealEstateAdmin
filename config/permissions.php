@@ -64,7 +64,26 @@ return [
             'edit project leads',
             'add project lead followup',
         ],
+        'customers' => [
+            'view customers',
+            'add customer',
+            'edit customer',
+            'delete customer',
+        ],
 
+        'channel partners' => [
+            'view channel partners',
+            'add channel partner',
+            'edit channel partner',
+            'delete channel partner',
+        ],
+
+        'bookings' => [
+            'view bookings',
+            'add booking',
+            'edit booking',
+            'delete booking',
+        ],
     ],
 
     
@@ -127,7 +146,26 @@ return [
         'project-leads.index' => 'view project leads',
         'project-leads.remark' => 'edit project leads',
         'lead-followup.store' => 'add project lead followup',
+        
+        'customers.index' => 'view customers',
+        'customers.create' => 'add customer',
+        'customers.store' => 'add customer',
+        'customers.edit' => 'edit customer',
+        'customers.update' => 'edit customer',
+        'customers.destroy' => 'delete customer',
 
+        'channel-partners.index' => 'view channel partners',
+        'channel-partners.create' => 'add channel partner',
+        'channel-partners.store' => 'add channel partner',
+        'channel-partners.edit' => 'edit channel partner',
+        'channel-partners.update' => 'edit channel partner',
+        'channel-partners.destroy' => 'delete channel partner',
+        'bookings.index' => 'view bookings',
+        'bookings.create' => 'add booking',
+        'bookings.store' => 'add booking',
+        'bookings.edit' => 'edit booking',
+        'bookings.update' => 'edit booking',
+        'bookings.destroy' => 'delete booking',
     ],
 
 ];

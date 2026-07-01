@@ -1,0 +1,517 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\Booking;
+use App\Models\Customer;
+use App\Models\Project;
+use App\Models\ChannelPartner;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+use App\Enums\UserRole;
+use App\Models\Tower;
+use App\Models\PropertyType;
+use App\Models\UnitType;
+use App\Models\Commission;
+use Illuminate\Support\Facades\DB;
+use App\Models\ChannelPartnerProject;
+class BookingController extends Controller
+{
+    public function index(Request $request)
+    {
+        $bookings = Booking::with(['customer', 'project', 'channelPartner'])
+            ->when($request->search, function ($q) use ($request) {
+                $q->where('booking_number', 'like', "%{$request->search}%")
+                    ->orWhereHas('customer', function ($cq) use ($request) {
+                        $cq->where('first_name', 'like', "%{$request->search}%")
+                            ->orWhere('last_name', 'like', "%{$request->search}%");
+                    })
+                    ->orWhere('unit_name', 'like', "%{$request->search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+        // dd($bookings->toArray());
+        return Inertia::render('Bookings/Index', [
+            'bookings' => $bookings,
+            'filters' => $request->only('search'),
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Bookings/Create', [
+            'customers' => Customer::select('_id', 'first_name', 'last_name')->get(),
+            'projects' => Project::select('_id', 'name')->get(),
+            'channelPartners' => ChannelPartner::select('_id', 'partner_name')->get(),
+
+            'users' => User::select('_id', 'name')
+                ->whereIn('role', [UserRole::MANAGER, UserRole::EMPLOYEE])
+                ->get(),
+        ]);
+    }
+
+    public function store(Request $request)
+{
+    $validated = $this->validateBooking($request);
+
+    $validated['created_by'] = auth()->id();
+
+    $fileFields = [
+        'booking_form',
+        'agreement_document',
+        'payment_receipt'
+    ];
+
+    foreach ($fileFields as $field) {
+        if ($request->hasFile($field)) {
+            $validated[$field] = $request
+                ->file($field)
+                ->store('bookings/docs', 'public');
+        }
+    }
+
+    DB::beginTransaction();
+
+    try {
+
+        
+
+        $partnerCommission = null;
+
+        if (
+            !empty($validated['channel_partner_id']) &&
+            !empty($validated['project_id'])
+        ) {
+            $partnerCommission =
+                ChannelPartnerProject::where(
+                    'channel_partner_id',
+                    $validated['channel_partner_id']
+                )
+                ->where(
+                    'project_id',
+                    $validated['project_id']
+                )
+                ->first();
+
+            if (!$partnerCommission) {
+                throw new \Exception(
+                    'Commission setting not found for selected Channel Partner and Project.'
+                );
+            }
+        }
+
+
+        $booking = Booking::create($validated);
+
+       
+
+        if ($partnerCommission) {
+
+            $commissionAmount = 0;
+
+            if (
+                $partnerCommission->commission_type === 'Percentage'
+            ) {
+                $commissionAmount =
+                    (
+                        (float) $booking->total_amount
+                        *
+                        (float) $partnerCommission->commission_value
+                    ) / 100;
+            } else {
+                $commissionAmount =
+                    (float) $partnerCommission->commission_value;
+            }
+
+            Commission::create([
+                'booking_id' =>
+                    $booking->id,
+
+                'channel_partner_id' =>
+                    $booking->channel_partner_id,
+
+                'commission_type' =>
+                    $partnerCommission->commission_type,
+
+                'commission_value' =>
+                    $partnerCommission->commission_value,
+
+                'commission_amount' =>
+                    $commissionAmount,
+
+                'payment_status' =>
+                    'Pending',
+
+                'payment_date' =>
+                    null,
+
+                'remarks' =>
+                    'Auto generated from booking.',
+
+                'created_by' =>
+                    auth()->id(),
+            ]);
+        }
+
+        DB::commit();
+
+        return redirect()
+            ->route('bookings.index')
+            ->with(
+                'success',
+                'Booking created successfully.'
+            );
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return back()
+            ->withInput()
+            ->with(
+                'error',
+                $e->getMessage()
+            );
+    }
+}
+
+    public function edit(Booking $booking)
+    {
+        return Inertia::render('Bookings/Edit', [
+            'booking' => $booking,
+            'customers' => Customer::select('id', 'first_name', 'last_name')->get(),
+            'projects' => Project::select('id', 'name')->get(),
+            'channelPartners' => ChannelPartner::select('id', 'partner_name')->get(),
+            'users' => User::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function update(Request $request, Booking $booking)
+    {
+        $validated = $this->validateBooking($request, $booking->id);
+        $validated['updated_by'] = auth()->id();
+
+        // Handle File Uploads
+        $fileFields = ['booking_form', 'agreement_document', 'payment_receipt'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                if ($booking->$field) {
+                    Storage::disk('public')->delete($booking->$field);
+                }
+                $validated[$field] = $request->file($field)->store('bookings/docs', 'public');
+            }
+        }
+
+        $booking->update($validated);
+
+        return redirect()->route('bookings.index')->with('success', 'Booking updated successfully.');
+    }
+
+    public function destroy(Booking $booking)
+    {
+        // Delete files
+        $fileFields = ['booking_form', 'agreement_document', 'payment_receipt'];
+        foreach ($fileFields as $field) {
+            if ($booking->$field) {
+                Storage::disk('public')->delete($booking->$field);
+            }
+        }
+
+        $booking->delete();
+        return back()->with('success', 'Booking deleted successfully.');
+    }
+
+    private function validateBooking(Request $request, $id = null)
+    {
+        return $request->validate([
+            'customer_id' => 'required',
+            'project_id' => 'required',
+            'unit_id' => 'nullable|string',
+            'channel_partner_id' => 'nullable',
+            'assigned_user_id' => 'nullable',
+
+            'booking_date' => 'required|date',
+            'agreement_date' => 'nullable|date',
+            'followup_date' => 'nullable|date',
+            'possession_date' => 'nullable|date',
+
+            'tower_name' => 'nullable|string',
+            'floor_name' => 'nullable|string',
+            'unit_name' => 'nullable|string',
+            'unit_type' => 'nullable|string',
+            'configuration' => 'nullable|string',
+            'unit_size' => 'nullable|string',
+            'unit_size_unit' => 'nullable|string',
+
+            'booking_amount' => 'nullable|numeric',
+            'other_amount' => 'nullable|numeric',
+            'discount_amount' => 'nullable|numeric',
+            'tax_amount' => 'nullable|numeric',
+            'total_amount' => 'required|numeric',
+
+            
+
+            'payment_plan' => 'nullable|string',
+            'payment_status' => 'required|string',
+
+            'booking_form' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'agreement_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'payment_receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+            'remarks' => 'nullable|string',
+            'cancellation_reason' => 'nullable|string',
+            'status' => 'required|string|in:Pending,Confirmed,Cancelled,Completed',
+        ]);
+    }
+    public function getProjectUnits($projectId)
+    {
+        $towers = Tower::where('project_id', $projectId)->get();
+
+        $propertyTypes = PropertyType::select('_id', 'name')
+            ->get()
+            ->keyBy('_id');
+
+        $unitTypes = UnitType::select('_id', 'name')
+            ->get()
+            ->keyBy('_id');
+
+        $result = [];
+
+        foreach ($towers as $tower) {
+
+            $floors = [];
+
+            foreach ($tower->units ?? [] as $unit) {
+
+                if (
+                    isset($unit['status']) &&
+                    strtolower($unit['status']) !== 'available'
+                ) {
+                    continue;
+                }
+
+                $unitNumber =
+                    $unit['unit_number']
+                    ?? $unit['name']
+                    ?? '';
+
+                $floorNumber =
+                    $unit['floor_number']
+                    ?? null;
+
+                $propertyTypeName = null;
+                $unitTypeName = null;
+                $roomSizes = [];
+                $unitSize = null;
+
+                /*
+                |--------------------------------------------------------------------------
+                | FLOOR DESIGN (Apartment)
+                |--------------------------------------------------------------------------
+                */
+
+                $floorDesign = null;
+
+                if (
+                    !empty($tower->floor_designs) &&
+                    $floorNumber !== null
+                ) {
+                    $floorDesign = collect(
+                        $tower->floor_designs
+                    )->first(function ($design) use ($floorNumber) {
+                        return
+                            $floorNumber >= ($design['from_floor'] ?? 0)
+                            &&
+                            $floorNumber <= ($design['to_floor'] ?? 0);
+                    });
+                }
+
+                if ($floorDesign) {
+
+                    $propertyType =
+                        $propertyTypes->get(
+                            $floorDesign['property_type_id']
+                        );
+
+                    $unitType =
+                        $unitTypes->get(
+                            $floorDesign['unit_type_id']
+                        );
+
+                    $propertyTypeName =
+                        $propertyType?->name;
+
+                    $unitTypeName =
+                        $unitType?->name;
+
+                    $roomSizes =
+                        $floorDesign['room_sizes']
+                        ?? [];
+
+                    $unitSize =
+                        $floorDesign['unit_size']
+                        ?? null;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | UNIT RANGE (Villa/Bungalow)
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !$floorDesign &&
+                    !empty($tower->unit_ranges)
+                ) {
+
+                    $numericUnit = (int) preg_replace(
+                        '/[^0-9]/',
+                        '',
+                        $unitNumber
+                    );
+
+                    $unitRange = collect(
+                        $tower->unit_ranges
+                    )->first(function ($range) use ($numericUnit) {
+                        return
+                            $numericUnit >= ($range['from_unit'] ?? 0)
+                            &&
+                            $numericUnit <= ($range['to_unit'] ?? 0);
+                    });
+
+                    if ($unitRange) {
+
+                        $propertyType =
+                            $propertyTypes->get(
+                                $unitRange['property_type_id']
+                            );
+
+                        $unitType =
+                            $unitTypes->get(
+                                $unitRange['unit_type_id']
+                            );
+
+                        $propertyTypeName =
+                            $propertyType?->name;
+
+                        $unitTypeName =
+                            $unitType?->name;
+
+                        $roomSizes =
+                            $unitRange['room_sizes']
+                            ?? [];
+
+                        $unitSize =
+                            $unitRange['unit_size']
+                            ?? null;
+                    }
+                }
+
+                $unitData = [
+                    'unit_id' =>
+                        $unit['_id']
+                        ?? $unitNumber,
+
+                    'tower_name' =>
+                        $tower->name,
+
+                    'floor_name' =>
+                        $floorNumber
+                        ?? 'Ground',
+
+                    'unit_name' =>
+                        $unitNumber,
+
+                    'property_type' =>
+                        $propertyTypeName,
+
+                    'configuration' =>
+                        $unitTypeName,
+
+                    'unit_type' =>
+                        $unitTypeName,
+
+                    'unit_size' =>
+                        $unitSize
+                        ?? $unit['unit_size']
+                        ?? '',
+
+                    'unit_size_unit' =>
+                        $unit['unit_size_unit']
+                        ?? 'Sq.Ft',
+
+                    'room_sizes' =>
+                        $roomSizes,
+
+                    'status' =>
+                        $unit['status']
+                        ?? 'available',
+                ];
+
+                $groupFloor =
+                    $floorNumber !== null
+                    ? $floorNumber
+                    : 'Ground';
+
+                $floors[$groupFloor][] =
+                    $unitData;
+            }
+
+            if (empty($floors)) {
+                continue;
+            }
+
+            if ($tower->type === 'apartment') {
+                krsort($floors);
+            }
+
+            $floorData = [];
+
+            foreach ($floors as $floorName => $units) {
+                $floorData[] = [
+                    'floor_name' => $floorName,
+                    'units' => array_values($units),
+                ];
+            }
+
+            $result[] = [
+                'tower_name' =>
+                    $tower->name,
+
+                'tower_type' =>
+                    $tower->type,
+
+                'total_floors' =>
+                    $tower->total_floors,
+
+                'total_units' =>
+                    $tower->total_units,
+
+                'floors' =>
+                    $floorData,
+            ];
+        }
+        // dd($result);
+        return response()->json($result);
+    }
+
+    public function getCommission($partnerId, $projectId)
+{
+    // dd($partnerId, $projectId);
+    $commission = ChannelPartnerProject::where(
+        'channel_partner_id',
+        $partnerId
+    )
+    ->where(
+        'project_id',
+        $projectId
+    )
+    ->first();
+
+    return response()->json($commission);
+}
+}

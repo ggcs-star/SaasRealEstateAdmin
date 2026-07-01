@@ -140,4 +140,13 @@ class Project extends Model
     // {
     //     return Tower::whereIn('_id', $this->tower_ids ?? [])->get();
     // }
+
+    public function channelPartnerCommissions()
+{
+    return $this->hasMany(
+        ChannelPartnerProject::class,
+        'project_id',
+        '_id'
+    );
+}
 }

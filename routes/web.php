@@ -16,6 +16,9 @@ use App\Http\Controllers\BuilderUserController;
 use App\Http\Controllers\PropertyTypeController;
 use App\Http\Controllers\UnitTypeController;
 use App\Http\Controllers\ProjectLeadController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ChannelPartnerController;
+use App\Http\Controllers\BookingController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -118,13 +121,34 @@ Route::middleware(['auth', 'check.permission'])->group(function () {
     Route::post('/project-leads/status', [ProjectLeadController::class, 'updateStatus'])->name('project-leads.status');
     Route::post('/project-leads/remark', [ProjectLeadController::class, 'updateRemark'])->name('project-leads.remark');
     Route::post('/lead-followup', [ProjectLeadController::class, 'addFollowup']);
-    
- 
 
-Route::post(
-    '/lead-followup/store',
-    [ProjectLeadController::class,'addFollowup']
-)->name('lead-followup.store');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+
+    Route::get('channel-partners', [ChannelPartnerController::class, 'index'])->name('channel-partners.index');
+    Route::get('channel-partners/create', [ChannelPartnerController::class, 'create'])->name('channel-partners.create');
+    Route::post('channel-partners', [ChannelPartnerController::class, 'store'])->name('channel-partners.store');
+    Route::get('channel-partners/{id}/edit', [ChannelPartnerController::class, 'edit'])->name('channel-partners.edit');
+    Route::put('channel-partners/{id}', [ChannelPartnerController::class, 'update'])->name('channel-partners.update');
+    Route::delete('channel-partners/{id}', [ChannelPartnerController::class, 'destroy'])->name('channel-partners.destroy');
+    Route::get('channel-partners/{id}', [ChannelPartnerController::class, 'show'])->name('channel-partners.show');
+
+    Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::get('bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('bookings/{booking}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
+    Route::put('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
+    Route::delete('bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/api/projects/{projectId}/units', [BookingController::class, 'getProjectUnits']);
+
+    Route::get('/channel-partners/{partner}/projects/{project}/commission',[BookingController::class, 'getCommission']);
+    Route::post('/lead-followup/store',[ProjectLeadController::class, 'addFollowup'])->name('lead-followup.store');
 });
 
 
