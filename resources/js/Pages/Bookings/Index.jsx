@@ -3,7 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 
 export default function Index({ auth, bookings, filters }) {
     const getStatusStyle = (status) => {
-        switch(status) {
+        switch (status) {
             case 'Confirmed': return 'bg-green-100 text-green-700';
             case 'Completed': return 'bg-blue-100 text-blue-700';
             case 'Cancelled': return 'bg-red-100 text-red-700';
@@ -77,6 +77,7 @@ export default function Index({ auth, bookings, filters }) {
                                             </span>
                                         </td>
                                         <td className="p-4 text-center space-x-3">
+                                            <Link href={route('bookings.show', booking.id)} className="text-blue-600 hover:text-blue-800 font-medium">View</Link>
                                             <Link href={route('bookings.edit', booking.id)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</Link>
                                             <button
                                                 onClick={() => {
