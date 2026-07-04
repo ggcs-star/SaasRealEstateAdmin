@@ -3,19 +3,81 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
-const InputGroup = ({ label, name, type = "text", data, setData, errors }) => (
-    <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input
-            type={type}
-            value={data[name]}
-            onChange={(e) => setData(name, e.target.value)}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-[#14B99F] focus:border-[#14B99F] px-3 py-2 border"
-        />
-        {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
-    </div>
-);
+const InputGroup = ({
+    label,
+    name,
+    type = "text",
+    data,
+    setData,
+    errors,
+    readOnly = false
+}) => (
 
+    <div className="mb-4">
+
+        <label className="block text-sm font-medium mb-1">
+
+            {label}
+
+        </label>
+
+        <input
+
+            type={type}
+
+            readOnly={readOnly}
+
+            value={data[name]}
+
+            onChange={(e) =>
+
+                !readOnly &&
+
+                setData(name, e.target.value)
+
+            }
+
+            className={`
+
+w-full
+
+rounded-md
+
+border
+
+px-3
+
+py-2
+
+${readOnly
+
+                    ?
+
+                    "bg-gray-100"
+
+                    :
+
+                    "bg-white"
+
+                }
+
+`}
+
+        />
+
+        {errors[name] && (
+
+            <p className="text-red-500 text-xs">
+
+                {errors[name]}
+
+            </p>
+
+        )}
+
+    </div>
+
+);
 const SelectGroup = ({ label, name, options, data, setData, errors, placeholder = "Select..." }) => (
     <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -57,7 +119,6 @@ export default function Form({ booking = null, customers, projects, channelPartn
     const [projectUnits, setProjectUnits] = useState([]);
     const [isLoadingUnits, setIsLoadingUnits] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState(null);
-    const [commission, setCommission] = useState(null);
 
     const { data, setData, post, processing, errors } = useForm({
         customer_id: booking?.customer_id || "",
@@ -85,7 +146,10 @@ export default function Form({ booking = null, customers, projects, channelPartn
         tax_amount: booking?.tax_amount || "",
         total_amount: booking?.total_amount || "",
 
-
+        // Commission Fields (Ab form se directly control honge)
+        commission_type: booking?.commission_type || "Percentage",
+        commission_value: booking?.commission_value || "",
+        commission_amount: booking?.commission_amount || 0,
 
         payment_plan: booking?.payment_plan || "",
         payment_status: booking?.payment_status || "Pending",
@@ -97,29 +161,120 @@ export default function Form({ booking = null, customers, projects, channelPartn
         remarks: booking?.remarks || "",
         cancellation_reason: booking?.cancellation_reason || "",
         status: booking?.status || "Pending",
+        base_price: booking?.base_price || "",
 
+        tax_percentage: booking?.tax_percentage || 0,
+
+        paid_amount: booking?.paid_amount || 0,
+
+        due_amount: booking?.due_amount || 0,
+
+        refund_amount: booking?.refund_amount || 0,
+
+        registration_date:
+            booking?.registration_date
+                ? booking.registration_date.split("T")[0]
+                : "",
+
+        cancellation_date:
+            booking?.cancellation_date
+                ? booking.cancellation_date.split("T")[0]
+                : "",
+
+        commission_status:
+            booking?.commission_status || "Pending",
         ...(isUpdate && { _method: 'put' })
     });
+
+    // Auto-Calculate Commission Amount whenever Total Amount or Commission Value changes
     useEffect(() => {
-        if (
-            data.channel_partner_id &&
-            data.project_id
-        ) {
-            axios
-                .get(
-                    `/api/channel-partners/${data.channel_partner_id}/projects/${data.project_id}/commission`
-                )
-                .then((res) => {
-                    setCommission(res.data);
-                })
-                .catch(() => {
-                    setCommission(null);
-                });
+
+        const base =
+            parseFloat(data.base_price) || 0;
+
+        const discount =
+            parseFloat(data.discount_amount) || 0;
+
+        const other =
+            parseFloat(data.other_amount) || 0;
+
+        const taxPercent =
+            parseFloat(data.tax_percentage) || 0;
+
+        const booking =
+            parseFloat(data.booking_amount) || 0;
+
+        const subtotal =
+            base - discount + other;
+
+        const tax =
+            (subtotal * taxPercent) / 100;
+
+        const total =
+            subtotal + tax;
+
+        const due =
+            total - booking;
+
+        let commission = 0;
+
+        if (data.channel_partner_id) {
+
+            if (data.commission_type === "Percentage") {
+
+                commission =
+                    (total *
+                        (parseFloat(data.commission_value) || 0)) /
+                    100;
+
+            } else {
+
+                commission =
+                    parseFloat(data.commission_value) || 0;
+            }
         }
+
+        setData(prev => ({
+
+            ...prev,
+
+            tax_amount:
+                tax.toFixed(2),
+
+            total_amount:
+                total.toFixed(2),
+
+            paid_amount:
+                booking.toFixed(2),
+
+            due_amount:
+                due.toFixed(2),
+
+            commission_amount:
+                commission.toFixed(2)
+
+        }));
+
     }, [
-        data.channel_partner_id,
-        data.project_id
+
+        data.base_price,
+
+        data.discount_amount,
+
+        data.other_amount,
+
+        data.tax_percentage,
+
+        data.booking_amount,
+
+        data.commission_type,
+
+        data.commission_value,
+
+        data.channel_partner_id
+
     ]);
+
     // Fetch Units logic
     useEffect(() => {
         if (data.project_id) {
@@ -145,8 +300,6 @@ export default function Form({ booking = null, customers, projects, channelPartn
             clearUnitData();
         }
     }, [data.project_id]);
-
-
 
     const clearUnitData = () => {
         setData(prev => ({
@@ -246,8 +399,8 @@ export default function Form({ booking = null, customers, projects, channelPartn
                                                             key={unit.unit_id}
                                                             onClick={() => handleUnitSelect(null, unit)}
                                                             className={`relative rounded-xl border p-4 transition-all duration-200 text-center ${data.unit_id === unit.unit_id
-                                                                    ? "border-[#14B99F] bg-[#14B99F]/10 shadow-lg scale-105"
-                                                                    : "border-gray-200 bg-white hover:border-[#14B99F] hover:shadow-md"
+                                                                ? "border-[#14B99F] bg-[#14B99F]/10 shadow-lg scale-105"
+                                                                : "border-gray-200 bg-white hover:border-[#14B99F] hover:shadow-md"
                                                                 }`}
                                                         >
                                                             {data.unit_id === unit.unit_id && (
@@ -306,26 +459,251 @@ export default function Form({ booking = null, customers, projects, channelPartn
                     <InputGroup label="Agreement Date" name="agreement_date" type="date" data={data} setData={setData} errors={errors} />
                     <InputGroup label="Follow-up Date" name="followup_date" type="date" data={data} setData={setData} errors={errors} />
                     <InputGroup label="Possession Date" name="possession_date" type="date" data={data} setData={setData} errors={errors} />
+                    <InputGroup
+                        label="Registration Date"
+                        name="registration_date"
+                        type="date"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    {
+                        data.status === "Cancelled" && (
+
+                            <InputGroup
+                                label="Cancellation Date"
+                                name="cancellation_date"
+                                type="date"
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                            />
+
+                        )
+                    }
                 </div>
             </div>
 
             {/* Section 5: Financials */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-800 border-b pb-3 mb-5">Financials & Payments</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <InputGroup label="Total Amount *" name="total_amount" type="number" data={data} setData={setData} errors={errors} />
-                    <InputGroup label="Booking Amount" name="booking_amount" type="number" data={data} setData={setData} errors={errors} />
-                    <InputGroup label="Discount Amount" name="discount_amount" type="number" data={data} setData={setData} errors={errors} />
-                    <InputGroup label="Tax Amount" name="tax_amount" type="number" data={data} setData={setData} errors={errors} />
-                    <InputGroup label="Other Charges" name="other_amount" type="number" data={data} setData={setData} errors={errors} />
-                    <SelectGroup label="Payment Status *" name="payment_status" data={data} setData={setData} errors={errors} options={[
-                        { value: "Pending", label: "Pending" },
-                        { value: "Partially Paid", label: "Partially Paid" },
-                        { value: "Paid", label: "Paid" }
-                    ]} />
-                </div>
-            </div>
+            <div className="bg-white p-6 rounded-lg shadow border">
 
+                <h3 className="text-lg font-bold mb-6">
+                    Financial Details
+                </h3>
+
+                <div className="grid md:grid-cols-3 gap-4">
+
+                    <InputGroup
+                        label="Base Price"
+                        name="base_price"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    <InputGroup
+                        label="Booking Amount"
+                        name="booking_amount"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    <InputGroup
+                        label="Discount"
+                        name="discount_amount"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    <InputGroup
+                        label="Other Charges"
+                        name="other_amount"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    <InputGroup
+                        label="Tax %"
+                        name="tax_percentage"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+
+                    <InputGroup
+                        label="Tax Amount"
+                        name="tax_amount"
+                        type="number"
+                        data={data}
+                        setData={() => { }}
+                        errors={errors}
+                        readOnly
+                    />
+
+                    <InputGroup
+                        label="Total Amount"
+                        name="total_amount"
+                        type="number"
+                        data={data}
+                        setData={() => { }}
+                        errors={errors}
+                        readOnly
+                    />
+
+                    <InputGroup
+                        label="Paid Amount"
+                        name="paid_amount"
+                        type="number"
+                        data={data}
+                        setData={() => { }}
+                        errors={errors}
+                        readOnly
+                    />
+
+                    <InputGroup
+                        label="Due Amount"
+                        name="due_amount"
+                        type="number"
+                        data={data}
+                        setData={() => { }}
+                        errors={errors}
+                        readOnly
+                    />
+
+                    <InputGroup
+                        label="Refund Amount"
+                        name="refund_amount"
+                        type="number"
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                    />
+                    <SelectGroup
+
+                        label="Payment Plan"
+
+                        name="payment_plan"
+
+                        data={data}
+
+                        setData={setData}
+
+                        errors={errors}
+
+                        options={[
+
+                            {
+                                value: "Construction Linked",
+                                label: "Construction Linked"
+                            },
+
+                            {
+                                value: "Down Payment",
+                                label: "Down Payment"
+                            },
+
+                            {
+                                value: "Flexi",
+                                label: "Flexi"
+                            },
+
+                            {
+                                value: "Lumpsum",
+                                label: "Lumpsum"
+                            },
+
+                            {
+                                value: "Custom",
+                                label: "Custom"
+                            }
+
+                        ]}
+
+                    />
+                </div>
+
+            </div>
+            {/* NAYA SECTION: Live Commission Input (Sirf tab dikhega jab Channel Partner select hoga) */}
+            {data.channel_partner_id && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-2 h-full bg-[#14B99F]"></div>
+                    <h3 className="text-lg font-bold text-gray-800 border-b pb-3 mb-5">Channel Partner Commission Setup</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <SelectGroup
+                            label="Commission Type"
+                            name="commission_type"
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            options={[
+                                { value: "Percentage", label: "Percentage (%)" },
+                                { value: "Fixed", label: "Fixed Amount (₹)" }
+                            ]}
+                        />
+                        <InputGroup
+                            label={`Commission Value ${data.commission_type === 'Percentage' ? '(%)' : '(₹)'}`}
+                            name="commission_value"
+                            type="number"
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                        />
+                        <SelectGroup
+
+                            label="Commission Status"
+
+                            name="commission_status"
+
+                            data={data}
+
+                            setData={setData}
+
+                            errors={errors}
+
+                            options={[
+
+                                {
+                                    value: "Pending",
+                                    label: "Pending"
+                                },
+
+                                {
+                                    value: "Approved",
+                                    label: "Approved"
+                                },
+
+                                {
+                                    value: "Paid",
+                                    label: "Paid"
+                                },
+
+                                {
+                                    value: "Cancelled",
+                                    label: "Cancelled"
+                                }
+
+                            ]}
+
+                        />
+                        {/* Live Calculated Amount Display */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Calculated Commission Amount</label>
+                            <div className="w-full bg-[#14B99F]/10 border border-[#14B99F]/30 rounded-md px-3 py-2 text-[#14B99F] font-bold">
+                                ₹ {data.commission_amount}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Section 6: Documents & Remarks */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 border-b pb-3 mb-5">Documents & Status</h3>
@@ -349,27 +727,7 @@ export default function Form({ booking = null, customers, projects, channelPartn
                     </div>
                 </div>
             </div>
-            {commission && (
-                <div className="bg-[#14B99F]/10 border border-[#14B99F]/20 rounded-xl p-4">
-                    <h4 className="font-semibold text-[#14B99F] mb-2">
-                        Channel Partner Commission
-                    </h4>
 
-                    <p>
-                        Type :
-                        <strong>
-                            {commission.commission_type}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Value :
-                        <strong>
-                            {commission.commission_value}
-                        </strong>
-                    </p>
-                </div>
-            )}
             <div className="flex justify-end pt-4">
                 <a href={route('bookings.index')} className="px-8 py-3 mr-4 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm font-semibold">Cancel</a>
                 <button type="submit" disabled={processing} className="px-8 py-3 bg-[#14B99F] text-white font-bold rounded-lg hover:bg-[#0EA88D] disabled:opacity-50 transition shadow-md">

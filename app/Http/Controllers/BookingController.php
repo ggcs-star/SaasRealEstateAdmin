@@ -40,7 +40,19 @@ class BookingController extends Controller
             'filters' => $request->only('search'),
         ]);
     }
-
+    public function show($id)
+    {
+        $booking = Booking::with([
+            'customer',
+            'project',
+            'channelPartner',
+            'assignedUser'
+        ])->findOrFail($id);
+        // dd($booking->toArray());
+        return Inertia::render('Bookings/Show', [
+            'booking' => $booking
+        ]);
+    }
     public function create()
     {
         return Inertia::render('Bookings/Create', [
@@ -55,129 +67,52 @@ class BookingController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $this->validateBooking($request);
+    {
 
-    $validated['created_by'] = auth()->id();
+        $validated = $this->validateBooking($request);
 
-    $fileFields = [
-        'booking_form',
-        'agreement_document',
-        'payment_receipt'
-    ];
+        $validated['created_by'] = auth()->id();
 
-    foreach ($fileFields as $field) {
-        if ($request->hasFile($field)) {
-            $validated[$field] = $request
-                ->file($field)
-                ->store('bookings/docs', 'public');
-        }
-    }
+        $this->calculateBooking($validated);
 
-    DB::beginTransaction();
-
-    try {
-
-        
-
-        $partnerCommission = null;
-
-        if (
-            !empty($validated['channel_partner_id']) &&
-            !empty($validated['project_id'])
-        ) {
-            $partnerCommission =
-                ChannelPartnerProject::where(
-                    'channel_partner_id',
-                    $validated['channel_partner_id']
-                )
-                ->where(
-                    'project_id',
-                    $validated['project_id']
-                )
-                ->first();
-
-            if (!$partnerCommission) {
-                throw new \Exception(
-                    'Commission setting not found for selected Channel Partner and Project.'
-                );
+        $files = ['booking_form', 'agreement_document', 'payment_receipt'];
+        foreach ($files as $file) {
+            if ($request->hasFile($file)) {
+                $validated[$file] = $request->file($file)->store('bookings/docs', 'public');
             }
         }
 
+        DB::beginTransaction();
 
-        $booking = Booking::create($validated);
+        try {
+            $booking = Booking::create($validated);
 
-       
-
-        if ($partnerCommission) {
-
-            $commissionAmount = 0;
-
-            if (
-                $partnerCommission->commission_type === 'Percentage'
-            ) {
-                $commissionAmount =
-                    (
-                        (float) $booking->total_amount
-                        *
-                        (float) $partnerCommission->commission_value
-                    ) / 100;
-            } else {
-                $commissionAmount =
-                    (float) $partnerCommission->commission_value;
+            if (!empty($booking->channel_partner_id)) {
+                Commission::create([
+                    'booking_id' => $booking->id,
+                    'channel_partner_id' => $booking->channel_partner_id,
+                    'commission_type' => $booking->commission_type,
+                    'commission_value' => $booking->commission_value,
+                    'commission_amount' => $booking->commission_amount,
+                    'payment_status' => $booking->commission_status ?? 'Pending',
+                    'payment_date' => null,
+                    'remarks' => 'Generated from Booking',
+                    'created_by' => auth()->id(),
+                ]);
             }
 
-            Commission::create([
-                'booking_id' =>
-                    $booking->id,
+            DB::commit();
 
-                'channel_partner_id' =>
-                    $booking->channel_partner_id,
+            return redirect()->route('bookings.index')
+                ->with('success', 'Booking created successfully.');
 
-                'commission_type' =>
-                    $partnerCommission->commission_type,
+        } catch (\Exception $e) {
+            DB::rollBack();
 
-                'commission_value' =>
-                    $partnerCommission->commission_value,
-
-                'commission_amount' =>
-                    $commissionAmount,
-
-                'payment_status' =>
-                    'Pending',
-
-                'payment_date' =>
-                    null,
-
-                'remarks' =>
-                    'Auto generated from booking.',
-
-                'created_by' =>
-                    auth()->id(),
-            ]);
+            return back()->withInput()
+                ->with('error', $e->getMessage());
         }
-
-        DB::commit();
-
-        return redirect()
-            ->route('bookings.index')
-            ->with(
-                'success',
-                'Booking created successfully.'
-            );
-
-    } catch (\Exception $e) {
-
-        DB::rollBack();
-
-        return back()
-            ->withInput()
-            ->with(
-                'error',
-                $e->getMessage()
-            );
     }
-}
 
     public function edit(Booking $booking)
     {
@@ -193,24 +128,118 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validated = $this->validateBooking($request, $booking->id);
+
         $validated['updated_by'] = auth()->id();
 
-        // Handle File Uploads
+        // Calculate all financials using the helper method
+        $this->calculateBooking($validated);
+
+        // Upload Files & Delete Old Ones
         $fileFields = ['booking_form', 'agreement_document', 'payment_receipt'];
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
-                if ($booking->$field) {
+                // Delete old file if exists
+                if (!empty($booking->$field)) {
                     Storage::disk('public')->delete($booking->$field);
                 }
+                // Store new file
                 $validated[$field] = $request->file($field)->store('bookings/docs', 'public');
             }
         }
 
-        $booking->update($validated);
+        DB::beginTransaction();
 
-        return redirect()->route('bookings.index')->with('success', 'Booking updated successfully.');
+        try {
+            // Update Booking
+            $booking->update($validated);
+
+            // Update or Create Commission
+            if (!empty($booking->channel_partner_id)) {
+                $commission = Commission::firstOrNew([
+                    'booking_id' => $booking->id,
+                ]);
+
+                $commission->fill([
+                    'channel_partner_id' => $booking->channel_partner_id,
+                    'commission_type' => $booking->commission_type,
+                    'commission_value' => $booking->commission_value,
+                    'commission_amount' => $booking->commission_amount,
+                    'payment_status' => $commission->payment_status ?? ($booking->commission_status ?? 'Pending'),
+                    'payment_date' => $commission->payment_date,
+                    'remarks' => $commission->remarks ?? 'Updated from Booking.',
+                    'created_by' => $commission->created_by ?? auth()->id(),
+                ]);
+
+                $commission->save();
+            }
+
+            DB::commit();
+
+            return redirect()->route('bookings.index')
+                ->with('success', 'Booking updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
+    private function calculateBooking(array &$validated): void
+    {
+        $basePrice = (float) ($validated['base_price'] ?? 0);
+        $discount = (float) ($validated['discount_amount'] ?? 0);
+        $other = (float) ($validated['other_amount'] ?? 0);
+        $tax = (float) ($validated['tax_percentage'] ?? 0);
+        $booking = (float) ($validated['booking_amount'] ?? 0);
 
+        $subTotal = $basePrice - $discount + $other;
+
+        $validated['tax_amount'] =
+            ($subTotal * $tax) / 100;
+
+        $validated['total_amount'] =
+            $subTotal + $validated['tax_amount'];
+
+        $validated['paid_amount'] =
+            $booking;
+
+        $validated['due_amount'] =
+            $validated['total_amount'] - $booking;
+
+        $validated['refund_amount'] =
+            (float) ($validated['refund_amount'] ?? 0);
+
+        if (
+            !empty($validated['channel_partner_id']) &&
+            !empty($validated['commission_value'])
+        ) {
+
+            if ($validated['commission_type'] === 'Percentage') {
+
+                $validated['commission_amount'] =
+                    (
+                        $validated['total_amount']
+                        *
+                        (float) $validated['commission_value']
+                    ) / 100;
+
+            } else {
+
+                $validated['commission_amount'] =
+                    (float) $validated['commission_value'];
+            }
+
+            $validated['commission_status'] =
+                $validated['commission_status']
+                ?? 'Pending';
+
+        } else {
+
+            $validated['commission_amount'] = 0;
+            $validated['commission_status'] = null;
+        }
+    }
     public function destroy(Booking $booking)
     {
         // Delete files
@@ -225,46 +254,111 @@ class BookingController extends Controller
         return back()->with('success', 'Booking deleted successfully.');
     }
 
-    private function validateBooking(Request $request, $id = null)
-    {
+    private function validateBooking(
+        Request $request,
+        $id = null
+    ) {
         return $request->validate([
+
+
             'customer_id' => 'required',
+
             'project_id' => 'required',
-            'unit_id' => 'nullable|string',
+
+            'unit_id' => 'required',
+
             'channel_partner_id' => 'nullable',
+
             'assigned_user_id' => 'nullable',
 
             'booking_date' => 'required|date',
+
             'agreement_date' => 'nullable|date',
+
+            'registration_date' => 'nullable|date',
+
             'followup_date' => 'nullable|date',
+
             'possession_date' => 'nullable|date',
 
+            'cancellation_date' => 'nullable|date',
+
             'tower_name' => 'nullable|string',
+
             'floor_name' => 'nullable|string',
+
             'unit_name' => 'nullable|string',
+
+            'property_type' => 'nullable|string',
+
             'unit_type' => 'nullable|string',
+
             'configuration' => 'nullable|string',
-            'unit_size' => 'nullable|string',
+
+            'unit_size' => 'nullable',
+
             'unit_size_unit' => 'nullable|string',
 
+
+            'base_price' => 'required|numeric',
+
             'booking_amount' => 'nullable|numeric',
-            'other_amount' => 'nullable|numeric',
+
             'discount_amount' => 'nullable|numeric',
+
+            'other_amount' => 'nullable|numeric',
+
+            'tax_percentage' => 'nullable|numeric',
+
             'tax_amount' => 'nullable|numeric',
-            'total_amount' => 'required|numeric',
 
-            
+            'total_amount' => 'nullable|numeric',
 
-            'payment_plan' => 'nullable|string',
-            'payment_status' => 'required|string',
+            'paid_amount' => 'nullable|numeric',
 
-            'booking_form' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'agreement_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'payment_receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'due_amount' => 'nullable|numeric',
 
-            'remarks' => 'nullable|string',
-            'cancellation_reason' => 'nullable|string',
-            'status' => 'required|string|in:Pending,Confirmed,Cancelled,Completed',
+            'refund_amount' => 'nullable|numeric',
+
+
+            'commission_type' =>
+                'nullable|in:Percentage,Fixed',
+
+            'commission_value' =>
+                'nullable|numeric',
+
+            'commission_amount' =>
+                'nullable|numeric',
+
+            'commission_status' =>
+                'nullable|string',
+
+            'payment_plan' =>
+                'nullable|string',
+
+            'payment_status' =>
+                'required|string',
+
+
+            'booking_form' =>
+                'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+            'agreement_document' =>
+                'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+            'payment_receipt' =>
+                'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+
+            'remarks' =>
+                'nullable|string',
+
+            'cancellation_reason' =>
+                'nullable|string',
+
+            'status' =>
+                'required|in:Pending,Confirmed,Completed,Cancelled',
+
         ]);
     }
     public function getProjectUnits($projectId)
@@ -308,11 +402,6 @@ class BookingController extends Controller
                 $roomSizes = [];
                 $unitSize = null;
 
-                /*
-                |--------------------------------------------------------------------------
-                | FLOOR DESIGN (Apartment)
-                |--------------------------------------------------------------------------
-                */
 
                 $floorDesign = null;
 
@@ -357,11 +446,6 @@ class BookingController extends Controller
                         ?? null;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | UNIT RANGE (Villa/Bungalow)
-                |--------------------------------------------------------------------------
-                */
 
                 if (
                     !$floorDesign &&
@@ -500,18 +584,18 @@ class BookingController extends Controller
     }
 
     public function getCommission($partnerId, $projectId)
-{
-    // dd($partnerId, $projectId);
-    $commission = ChannelPartnerProject::where(
-        'channel_partner_id',
-        $partnerId
-    )
-    ->where(
-        'project_id',
-        $projectId
-    )
-    ->first();
+    {
+        // dd($partnerId, $projectId);
+        $commission = ChannelPartnerProject::where(
+            'channel_partner_id',
+            $partnerId
+        )
+            ->where(
+                'project_id',
+                $projectId
+            )
+            ->first();
 
-    return response()->json($commission);
-}
+        return response()->json($commission);
+    }
 }
