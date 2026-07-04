@@ -204,4 +204,6 @@ class Booking extends Model
             '_id'
         )->latest();
     }
+
+
 }

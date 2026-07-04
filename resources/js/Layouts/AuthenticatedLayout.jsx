@@ -2,13 +2,32 @@ import React, { useState, useEffect } from "react";
 import { Link, usePage } from '@inertiajs/react';
 
 import {
-    LayoutDashboard, Users, Building, MessageSquare, Settings, LogOut, Bell,
-    Megaphone, Handshake, FileText, IndianRupee, HardHat, LifeBuoy, ShieldCheck,
-    Briefcase, BarChart3, Bot, Image, Palette, Server, ChevronDown, Menu, X,
-    Home, Grid, Key, UserCog, Star, Trophy, Target, Clock, Calendar,
-    TrendingUp, PieChart, Award, Globe, Mail, Phone, MapPin, Search,
-    DollarSign, Activity, CheckCircle
-} from 'lucide-react';
+    LayoutDashboard,
+    Users,
+    Building2,
+    Building,
+
+    Home,
+    Layers3,
+    MapPinned,
+    Handshake,
+    UserRound,
+    CalendarCheck2,
+    Wallet,
+    BadgeIndianRupee,
+    ShieldCheck,
+    HardHat,
+    Star,
+    Menu,
+    X,
+    Bell,
+    Search,
+    ChevronDown,
+    UserCog,
+    LogOut,
+    MessageSquare,
+    BedDouble
+} from "lucide-react";
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -161,7 +180,7 @@ export default function Authenticated({ user, header, children }) {
 
                     <SidebarItem
                         href="categories.index"
-                        icon={Grid}
+                        icon={Layers3}
                         label="Categories"
                         permission="view categories"
                     />
@@ -173,44 +192,56 @@ export default function Authenticated({ user, header, children }) {
                         permission="view property types"
                     />
 
-                    <SidebarItem
-                        href="unit-types.index"
-                        icon={Grid}
-                        label="Unit Types"
-                        permission="view unit types"
-                    />
+                   <SidebarItem
+    href="unit-types.index"
+    icon={BedDouble}
+    label="Unit Types"
+    permission="view unit types"
+/>
 
                     <SidebarItem
                         href="projects.index"
-                        icon={Building}
+                        icon={Building2}
                         label="Projects"
                         permission="view project"
                     />
                     <SidebarItem
                         href="project-leads.index"
-                        icon={Briefcase}
+                        icon={MapPinned}
                         label="Project Leads"
                         permission="view project leads"
                     />
 
                     <SidebarItem
                         href="customers.index"
-                        icon={Briefcase}
+                        icon={UserRound}
                         label="Customers"
                         permission="view customers"
                     />
                     <SidebarItem
                         href="channel-partners.index"
-                        icon={Briefcase}
+                        icon={Handshake}
                         label="Channel Partners"
                         permission="view channel partners"
                     />
 
                     <SidebarItem
                         href="bookings.index"
-                        icon={Calendar}
+                        icon={CalendarCheck2}
                         label="Bookings"
                         permission="view bookings"
+                    />
+                    <SidebarItem
+                        href="collections.index"
+                        icon={Wallet}
+                        label="Collections"
+                        permission="view collections"
+                    />
+                    <SidebarItem
+                        href="commissions.index"
+                        icon={BadgeIndianRupee}
+                        label="Commissions"
+                        permission="view commissions"
                     />
 
 
