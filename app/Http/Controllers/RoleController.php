@@ -13,10 +13,13 @@ class RoleController extends Controller
     {
         return Inertia::render('Roles/Index', [
             'roles' => Role::all(),
+
+            'permissionsModules' => config('permissions.modules'),
+
             'permissionsList' => collect(config('permissions.modules'))
                 ->flatten()
                 ->values()
-                ->toArray()
+                ->toArray(),
         ]);
     }
 

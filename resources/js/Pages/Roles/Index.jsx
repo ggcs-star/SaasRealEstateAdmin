@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 export default function Index() {
-    const { roles, permissionsList, auth } = usePage().props;
+    const { roles, permissionsList, permissionsModules, auth } = usePage().props;
     const [selectedRole, setSelectedRole] = useState(null);
     const [search, setSearch] = useState('');
     const [selectAllHover, setSelectAllHover] = useState(false);
@@ -34,17 +34,13 @@ export default function Index() {
     });
 
     // Categorize permissions
-    const categorizedPermissions = permissionsList.reduce((acc, permission) => {
-        const category = permission.split('.')[0] || 'general';
-        if (!acc[category]) {
-            acc[category] = [];
-        }
-        acc[category].push(permission);
-        return acc;
-    }, {});
+
 
     // Get unique categories
-    const categories = ['all', ...Object.keys(categorizedPermissions).sort()];
+    const categories = [
+        'all',
+        ...Object.keys(permissionsModules)
+    ];
 
     // Filter permissions by search and category
     const filteredPermissions = permissionsList.filter(p => {
@@ -54,13 +50,28 @@ export default function Index() {
     });
 
     // Group filtered permissions by category for display
-    const groupedFilteredPermissions = filteredPermissions.reduce((acc, permission) => {
-        const category = permission.split('.')[0] || 'general';
-        if (!acc[category]) {
-            acc[category] = [];
+    const groupedFilteredPermissions = Object.entries(
+        permissionsModules
+    ).reduce((acc, [module, permissions]) => {
+
+        const filtered = permissions.filter(permission => {
+            const matchesSearch = permission
+                .toLowerCase()
+                .includes(search.toLowerCase());
+
+            const matchesCategory =
+                categoryFilter === 'all' ||
+                categoryFilter === module;
+
+            return matchesSearch && matchesCategory;
+        });
+
+        if (filtered.length > 0) {
+            acc[module] = filtered;
         }
-        acc[category].push(permission);
+
         return acc;
+
     }, {});
 
     // Select role
@@ -85,18 +96,27 @@ export default function Index() {
 
     // Toggle category permissions
     function toggleCategory(category, permissions) {
-        const categoryPerms = permissions.filter(p => p.startsWith(category));
-        const allSelected = categoryPerms.every(p => data.permissions.includes(p));
-        
+        const allSelected = permissions.every(
+            p => data.permissions.includes(p)
+        );
+
         if (allSelected) {
-            setData('permissions', data.permissions.filter(p => !p.startsWith(category)));
+            setData(
+                'permissions',
+                data.permissions.filter(
+                    p => !permissions.includes(p)
+                )
+            );
         } else {
+
             const newPerms = [...data.permissions];
-            categoryPerms.forEach(p => {
+
+            permissions.forEach(p => {
                 if (!newPerms.includes(p)) {
                     newPerms.push(p);
                 }
             });
+
             setData('permissions', newPerms);
         }
     }
@@ -119,7 +139,7 @@ export default function Index() {
         <AuthenticatedLayout user={auth.user}>
             <div className="py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
+
                     {/* Header */}
                     <div className="mb-8">
                         <div className="flex items-center gap-3">
@@ -168,51 +188,46 @@ export default function Index() {
                                             <button
                                                 key={role._id}
                                                 onClick={() => selectRole(role)}
-                                                className={`w-full text-left p-3 rounded-lg transition-all duration-200 group ${
-                                                    selectedRole?._id === role._id
+                                                className={`w-full text-left p-3 rounded-lg transition-all duration-200 group ${selectedRole?._id === role._id
                                                         ? 'bg-gradient-to-r from-emerald-600 to-teal-600 shadow-lg shadow-emerald-200'
                                                         : 'hover:bg-gray-50'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2 min-w-0">
-                                                        <div className={`p-1.5 rounded-lg ${
-                                                            selectedRole?._id === role._id
+                                                        <div className={`p-1.5 rounded-lg ${selectedRole?._id === role._id
                                                                 ? 'bg-white/20'
                                                                 : 'bg-gray-100 group-hover:bg-gray-200'
-                                                        }`}>
-                                                            <Shield className={`w-4 h-4 ${
-                                                                selectedRole?._id === role._id
+                                                            }`}>
+                                                            <Shield className={`w-4 h-4 ${selectedRole?._id === role._id
                                                                     ? 'text-white'
                                                                     : 'text-gray-600'
-                                                            }`} />
+                                                                }`} />
                                                         </div>
-                                                        <span className={`font-medium truncate ${
-                                                            selectedRole?._id === role._id
+                                                        <span className={`font-medium truncate ${selectedRole?._id === role._id
                                                                 ? 'text-white'
                                                                 : 'text-gray-700'
-                                                        }`}>
+                                                            }`}>
                                                             {role.name}
                                                         </span>
                                                     </div>
-                                                    
+
                                                     {selectedRole?._id === role._id && (
                                                         <ChevronRight className="w-4 h-4 text-white flex-shrink-0" />
                                                     )}
-                                                    
+
                                                     {role.permissions?.length > 0 && selectedRole?._id !== role._id && (
                                                         <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
                                                             {role.permissions.length}
                                                         </span>
                                                     )}
                                                 </div>
-                                                
+
                                                 {role.description && (
-                                                    <p className={`text-xs mt-1 truncate ${
-                                                        selectedRole?._id === role._id
+                                                    <p className={`text-xs mt-1 truncate ${selectedRole?._id === role._id
                                                             ? 'text-emerald-100'
                                                             : 'text-gray-500'
-                                                    }`}>
+                                                        }`}>
                                                         {role.description}
                                                     </p>
                                                 )}
@@ -296,7 +311,7 @@ export default function Index() {
                                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                                     />
                                                 </div>
-                                                
+
                                                 <div className="relative sm:w-48">
                                                     <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                     <select
@@ -335,7 +350,7 @@ export default function Index() {
                                                     )}
                                                     {selectAllHover && allSelected ? 'Deselect All' : 'Select All'}
                                                 </button>
-                                                
+
                                                 <button
                                                     onClick={() => setData('permissions', [])}
                                                     className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -366,8 +381,8 @@ export default function Index() {
                                                                     onClick={() => toggleCategory(category, perms)}
                                                                     className="text-xs text-emerald-600 hover:text-emerald-800 font-medium"
                                                                 >
-                                                                    {perms.every(p => data.permissions.includes(p)) 
-                                                                        ? 'Deselect All' 
+                                                                    {perms.every(p => data.permissions.includes(p))
+                                                                        ? 'Deselect All'
                                                                         : 'Select All'}
                                                                 </button>
                                                             </div>
@@ -379,11 +394,10 @@ export default function Index() {
                                                                     return (
                                                                         <label
                                                                             key={p}
-                                                                            className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                                                                isSelected
+                                                                            className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${isSelected
                                                                                     ? 'border-emerald-500 bg-emerald-50 shadow-sm'
                                                                                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                                                            }`}
+                                                                                }`}
                                                                         >
                                                                             <input
                                                                                 type="checkbox"
@@ -398,16 +412,14 @@ export default function Index() {
                                                                                     ) : (
                                                                                         <Unlock className="w-3 h-3 text-gray-400" />
                                                                                     )}
-                                                                                    <span className={`text-xs font-medium truncate ${
-                                                                                        isSelected ? 'text-emerald-700' : 'text-gray-500'
-                                                                                    }`}>
+                                                                                    <span className={`text-xs font-medium truncate ${isSelected ? 'text-emerald-700' : 'text-gray-500'
+                                                                                        }`}>
                                                                                         {category}
                                                                                     </span>
                                                                                 </div>
-                                                                                <p className={`text-sm font-medium truncate ${
-                                                                                    isSelected ? 'text-emerald-900' : 'text-gray-700'
-                                                                                }`}>
-                                                                                    {p.split('.').slice(1).join('.') || p}
+                                                                                <p className={`text-sm font-medium truncate ${isSelected ? 'text-emerald-900' : 'text-gray-700'
+                                                                                    }`}>
+                                                                                    {p}
                                                                                 </p>
                                                                             </div>
                                                                         </label>

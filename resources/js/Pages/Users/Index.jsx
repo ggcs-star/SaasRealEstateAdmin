@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { usePage, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { 
-    Users, 
-    UserPlus, 
-    Shield, 
+import {
+    Users,
+    UserPlus,
+    Shield,
     Search,
     ChevronDown,
     CheckCircle,
@@ -18,13 +18,14 @@ import {
 } from 'lucide-react';
 
 export default function Index() {
-    const { users, roles, auth } = usePage().props;
+    const { users, roles, managers, auth, userRoles } = usePage().props;
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
 
     const { data, setData, post, processing, errors } = useForm({
         user_id: '',
-        role: ''
+        role: '',
+        manager_id: '',
     });
 
     function submit(e) {
@@ -40,15 +41,15 @@ export default function Index() {
 
     // Filter users based on search and role
     const filteredUsers = users.filter(user => {
-        const matchesSearch = 
+        const matchesSearch =
             user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesRole = 
-            roleFilter === 'all' || 
+
+        const matchesRole =
+            roleFilter === 'all' ||
             (roleFilter === 'assigned' && user.role) ||
             (roleFilter === 'unassigned' && !user.role);
-        
+
         return matchesSearch && matchesRole;
     });
 
@@ -61,7 +62,7 @@ export default function Index() {
         <AuthenticatedLayout user={auth.user}>
             <div className="py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
+
                     {/* Header Section */}
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-2">
@@ -119,100 +120,131 @@ export default function Index() {
                     </div>
 
                     {/* Assignment Form Card */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-200">
-                            <div className="flex items-center gap-2">
-                                <Award className="w-5 h-5 text-emerald-600" />
-                                <h2 className="text-lg font-semibold text-gray-900">
-                                    Assign New Role
-                                </h2>
+                    {auth.user.role === userRoles.SUPER_ADMIN && (
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-gray-200">
+                                <div className="flex items-center gap-2">
+                                    <Award className="w-5 h-5 text-emerald-600" />
+                                    <h2 className="text-lg font-semibold text-gray-900">
+                                        Assign New Role
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <div className="p-6">
+                                <form onSubmit={submit} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {/* User Select */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-gray-700">
+                                                Select User <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                <select
+                                                    value={data.user_id}
+                                                    onChange={e => setData('user_id', e.target.value)}
+                                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${errors.user_id ? 'border-red-300' : 'border-gray-300'
+                                                        }`}
+                                                >
+                                                    <option value="">Choose a user...</option>
+                                                    {users.map(user => (
+                                                        <option key={user.id || user._id} value={user.id || user._id}>
+                                                            {user.name} {user.role ? `(Current: ${user.role})` : ''}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                                            </div>
+                                            {errors.user_id && (
+                                                <p className="text-sm text-red-600 mt-1">{errors.user_id}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Role Select */}
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-gray-700">
+                                                Select Role <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                <select
+                                                    value={data.role}
+                                                    onChange={(e) => {
+                                                        setData('role', e.target.value);
+                                                        setData('manager_id', '');
+                                                    }}
+                                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${errors.role ? 'border-red-300' : 'border-gray-300'
+                                                        }`}
+                                                >
+                                                    <option value="">Choose a role...</option>
+                                                    {roles.map(role => (
+                                                        <option key={role.id} value={role.name}>
+                                                            {role.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                                            </div>
+                                            {errors.role && (
+                                                <p className="text-sm text-red-600 mt-1">{errors.role}</p>
+                                            )}
+                                        </div>
+                                        {data.role === userRoles.EMPLOYEE && (
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-700">
+                                                    Select Manager <span className="text-red-500">*</span>
+                                                </label>
+
+                                                <select
+                                                    value={data.manager_id}
+                                                    onChange={(e) => setData('manager_id', e.target.value)}
+                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-emerald-500"
+                                                >
+                                                    <option value="">Select Manager</option>
+
+                                                    {managers.map(manager => (
+                                                        <option
+                                                            key={manager.id}
+                                                            value={manager.id}
+                                                        >
+                                                            {manager.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+
+                                                {errors.manager_id && (
+                                                    <p className="text-red-500 text-sm">
+                                                        {errors.manager_id}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                        {/* Submit Button */}
+                                        <div className="flex items-end">
+                                            <button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                                            >
+                                                {processing ? (
+                                                    <>
+                                                        <RefreshCw className="w-4 h-4 animate-spin" />
+                                                        Assigning...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <UserPlus className="w-4 h-4" />
+                                                        Assign Role
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-
-                        <div className="p-6">
-                            <form onSubmit={submit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {/* User Select */}
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-700">
-                                            Select User <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                            <select
-                                                value={data.user_id}
-                                                onChange={e => setData('user_id', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${
-                                                    errors.user_id ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                            >
-                                                <option value="">Choose a user...</option>
-                                                {users.map(user => (
-                                                    <option key={user.id || user._id} value={user.id || user._id}>
-                                                        {user.name} {user.role ? `(Current: ${user.role})` : ''}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                        {errors.user_id && (
-                                            <p className="text-sm text-red-600 mt-1">{errors.user_id}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Role Select */}
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-700">
-                                            Select Role <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                            <select
-                                                value={data.role}
-                                                onChange={e => setData('role', e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${
-                                                    errors.role ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                            >
-                                                <option value="">Choose a role...</option>
-                                                {roles.map(role => (
-                                                    <option key={role.id} value={role.name}>
-                                                        {role.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                        {errors.role && (
-                                            <p className="text-sm text-red-600 mt-1">{errors.role}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Submit Button */}
-                                    <div className="flex items-end">
-                                        <button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-                                        >
-                                            {processing ? (
-                                                <>
-                                                    <RefreshCw className="w-4 h-4 animate-spin" />
-                                                    Assigning...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <UserPlus className="w-4 h-4" />
-                                                    Assign Role
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
+                    )}
                     {/* Users List Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         {/* List Header with Filters */}
@@ -343,7 +375,7 @@ export default function Index() {
                                                         No users found
                                                     </h3>
                                                     <p className="text-sm text-gray-500">
-                                                        {searchTerm || roleFilter !== 'all' 
+                                                        {searchTerm || roleFilter !== 'all'
                                                             ? 'Try adjusting your search or filter criteria'
                                                             : 'No users are available in the system'}
                                                     </p>

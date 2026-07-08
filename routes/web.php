@@ -19,6 +19,8 @@ use App\Http\Controllers\ProjectLeadController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChannelPartnerController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\CollectionController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -147,6 +149,12 @@ Route::middleware(['auth', 'check.permission'])->group(function () {
     Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::get('/api/projects/{projectId}/units', [BookingController::class, 'getProjectUnits']);
 
+    Route::get('commissions', [CommissionController::class, 'index'])->name('commissions.index');
+    Route::get('commissions/{id}', [CommissionController::class, 'show'])->name('commissions.show');
+
+    Route::resource('collections', CollectionController::class);
+    Route::post('collections/{collection}/receive-payment', [CollectionController::class, 'receivePayment'])->name('collections.receive-payment');
+    Route::post('collections/store-bulk', [CollectionController::class, 'storeBulk'])->name('collections.storeBulk');
     Route::get('/channel-partners/{partner}/projects/{project}/commission',[BookingController::class, 'getCommission']);
     Route::post('/lead-followup/store',[ProjectLeadController::class, 'addFollowup'])->name('lead-followup.store');
 });

@@ -84,9 +84,19 @@ return [
             'edit booking',
             'delete booking',
         ],
+        'commissions' => [
+            'view commissions',
+        ],
+        'collections' => [
+            'view collections',
+            'add collection',
+            'edit collection',
+            'delete collection',
+            'receive payment',
+        ],
     ],
 
-    
+
     'route_map' => [
 
         // Roles
@@ -109,12 +119,12 @@ return [
         'projects.delete' => 'delete project',
 
         'amenities.index' => 'view amenities',
-        'amenities.store' => 'add amenity', 
+        'amenities.store' => 'add amenity',
         'amenities.update' => 'edit amenity',
         'amenities.destroy' => 'delete amenity',
 
         'categories.index' => 'view categories',
-        'categories.store' => 'add category',   
+        'categories.store' => 'add category',
         'categories.update' => 'edit category',
         'categories.destroy' => 'delete category',
 
@@ -146,7 +156,7 @@ return [
         'project-leads.index' => 'view project leads',
         'project-leads.remark' => 'edit project leads',
         'lead-followup.store' => 'add project lead followup',
-        
+
         'customers.index' => 'view customers',
         'customers.create' => 'add customer',
         'customers.store' => 'add customer',
@@ -166,6 +176,17 @@ return [
         'bookings.edit' => 'edit booking',
         'bookings.update' => 'edit booking',
         'bookings.destroy' => 'delete booking',
+
+        'commissions.index' => 'view commissions',
+        'commissions.show' => 'view commissions',
+
+        'collections.index' => 'view collections',
+        'collections.create' => 'add collection',
+        'collections.store' => 'add collection',
+        'collections.edit' => 'edit collection',
+        'collections.update' => 'edit collection',
+        'collections.destroy' => 'delete collection',
+        'collections.receive-payment' => 'receive payment',
     ],
 
 ];

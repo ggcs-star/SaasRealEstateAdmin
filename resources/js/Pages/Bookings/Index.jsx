@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-
+import { useState, useEffect } from 'react';
+import AddScheduleModal from "@/Components/AddScheduleModal";
 export default function Index({ auth, bookings, filters }) {
     const getStatusStyle = (status) => {
         switch (status) {
@@ -9,6 +10,13 @@ export default function Index({ auth, bookings, filters }) {
             case 'Cancelled': return 'bg-red-100 text-red-700';
             default: return 'bg-yellow-100 text-yellow-700'; // Pending
         }
+    };
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
+
+    const openScheduleModal = (booking) => {
+        setSelectedBooking(booking);
+        setIsScheduleModalOpen(true);
     };
 
     return (
@@ -77,6 +85,12 @@ export default function Index({ auth, bookings, filters }) {
                                             </span>
                                         </td>
                                         <td className="p-4 text-center space-x-3">
+                                            <button
+                                                onClick={() => openScheduleModal(booking)}
+                                                className="px-3 py-1 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                                            >
+                                                Collection
+                                            </button>
                                             <Link href={route('bookings.show', booking.id)} className="text-blue-600 hover:text-blue-800 font-medium">View</Link>
                                             <Link href={route('bookings.edit', booking.id)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</Link>
                                             <button
@@ -97,6 +111,15 @@ export default function Index({ auth, bookings, filters }) {
                     </table>
                 </div>
             </div>
+            <AddScheduleModal
+                key={selectedBooking?.id}
+                isOpen={isScheduleModalOpen}
+                onClose={() => {
+                    setIsScheduleModalOpen(false);
+                    setSelectedBooking(null);
+                }}
+                selectedBooking={selectedBooking}
+            />
         </AuthenticatedLayout>
     );
 }

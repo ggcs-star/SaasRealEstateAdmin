@@ -1,12 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     UserIcon, BuildingOfficeIcon, CalendarIcon,
     BanknotesIcon, DocumentTextIcon, UserGroupIcon,
-    ArrowLeftIcon, PencilSquareIcon
+    ArrowLeftIcon, PencilSquareIcon, PlusIcon, XMarkIcon, ClockIcon, CheckBadgeIcon
 } from "@heroicons/react/24/outline";
-
-// Format currency helper
+import AddScheduleModal from '@/Components/AddScheduleModal';
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -15,7 +15,6 @@ const formatCurrency = (amount) => {
     }).format(amount || 0);
 };
 
-// Format date helper
 const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -23,7 +22,6 @@ const formatDate = (dateString) => {
     });
 };
 
-// Reusable Detail Row Component
 const DetailRow = ({ label, value, isBold = false, highlight = false }) => (
     <div className="flex justify-between py-2 border-b border-gray-100 last:border-0">
         <span className="text-gray-500 text-sm">{label}</span>
@@ -33,22 +31,47 @@ const DetailRow = ({ label, value, isBold = false, highlight = false }) => (
     </div>
 );
 
-// Status Badge Component
-const StatusBadge = ({ status, type = 'default' }) => {
+const StatusBadge = ({ status }) => {
     let colors = 'bg-gray-100 text-gray-700';
-
     if (status === 'Confirmed' || status === 'Paid' || status === 'Completed') colors = 'bg-green-100 text-green-700';
     else if (status === 'Pending' || status === 'Partially Paid') colors = 'bg-yellow-100 text-yellow-700';
-    else if (status === 'Cancelled') colors = 'bg-red-100 text-red-700';
+    else if (status === 'Cancelled' || status === 'Overdue') colors = 'bg-red-100 text-red-700';
 
     return (
-        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${colors}`}>
+        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${colors}`}>
             {status || 'Unknown'}
         </span>
     );
 };
 
 export default function Show({ auth, booking }) {
+
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const { data: scheduleData, setData: setScheduleData, post: postSchedule, processing: processingSchedule, errors: scheduleErrors, reset: resetSchedule, clearErrors: clearScheduleErrors } = useForm({
+        booking_id: booking.id || booking._id,
+        installment_name: '',
+        scheduled_date: '',
+        scheduled_amount: '',
+        remarks: ''
+    });
+
+    const openScheduleModal = () => setIsScheduleModalOpen(true);
+    const closeScheduleModal = () => {
+        setIsScheduleModalOpen(false);
+        setTimeout(() => {
+            resetSchedule();
+            clearScheduleErrors();
+        }, 300);
+    };
+
+    const submitSchedule = (e) => {
+        e.preventDefault();
+        postSchedule(route('collections.store'), {
+            preserveScroll: true,
+            onSuccess: () => closeScheduleModal(),
+        });
+    };
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title={`Booking ${booking.booking_number}`} />
@@ -128,6 +151,59 @@ export default function Show({ auth, booking }) {
                                 <DetailRow label="Property Type" value={booking.property_type?.toUpperCase()} />
                                 <DetailRow label="Configuration" value={booking.unit_type?.toUpperCase()} />
                                 <DetailRow label="Size" value={`${booking.unit_size || ''} ${booking.unit_size_unit || ''}`} />
+                            </div>
+                        </div>
+
+                        {/* --- NEW SECTION: PAYMENT SCHEDULES (COLLECTIONS) --- */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-2 h-full bg-[#14B99F]"></div>
+                            <div className="flex items-center justify-between border-b pb-3 mb-4 mt-1">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-[#14B99F]/10 rounded-lg"><BanknotesIcon className="w-5 h-5 text-[#14B99F]" /></div>
+                                    <h3 className="text-lg font-bold text-gray-800">Payment Schedules</h3>
+                                </div>
+                                <button
+                                    onClick={() => setIsScheduleModalOpen(true)}
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-[#14B99F]/10 text-[#14B99F] hover:bg-[#14B99F] hover:text-white rounded-lg font-semibold text-sm transition"
+                                >
+                                    <PlusIcon className="w-4 h-4" /> Add Schedule
+                                </button>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left text-gray-600">
+                                    <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] tracking-wider font-semibold">
+                                        <tr>
+                                            <th className="p-3">Installment Name</th>
+                                            <th className="p-3">Scheduled Date</th>
+                                            <th className="p-3 text-right">Amount</th>
+                                            <th className="p-3 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {!booking.collections || booking.collections.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" className="p-6 text-center text-gray-400 italic">
+                                                    No payment schedules created yet.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            booking.collections.map((col) => (
+                                                <tr key={col.id || col._id} className="hover:bg-gray-50">
+                                                    <td className="p-3 font-medium text-gray-800">{col.installment_name || 'Scheduled Payment'}</td>
+                                                    <td className="p-3 flex items-center gap-2">
+                                                        <CalendarIcon className="w-4 h-4 text-gray-400" />
+                                                        {formatDate(col.scheduled_date)}
+                                                    </td>
+                                                    <td className="p-3 text-right font-bold">{formatCurrency(col.scheduled_amount)}</td>
+                                                    <td className="p-3 text-center">
+                                                        <StatusBadge status={col.status} />
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
@@ -314,8 +390,14 @@ export default function Show({ auth, booking }) {
                 <div className="text-center text-xs text-gray-400 py-4">
                     Created On {formatDate(booking.created_at)} • Last Updated On {formatDate(booking.updated_at)}
                 </div>
-
             </div>
+
+            <AddScheduleModal
+                isOpen={isScheduleModalOpen}
+                onClose={() => setIsScheduleModalOpen(false)}
+                selectedBooking={booking}
+            />
+
         </AuthenticatedLayout>
     );
 }

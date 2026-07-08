@@ -27,7 +27,7 @@ class CheckPermission
         }
 
         if ($permission && !$user->hasPermission($permission)) {
-            abort(403, 'Unauthorized ❌');
+            abort(403, 'Unauthorized');
         }
 
         return $next($request);

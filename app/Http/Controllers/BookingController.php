@@ -22,7 +22,12 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $bookings = Booking::with(['customer', 'project', 'channelPartner'])
+        $bookings = Booking::with([
+            'customer',
+            'project',
+            'channelPartner',
+            'collections'
+        ])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('booking_number', 'like', "%{$request->search}%")
                     ->orWhereHas('customer', function ($cq) use ($request) {
@@ -46,9 +51,12 @@ class BookingController extends Controller
             'customer',
             'project',
             'channelPartner',
-            'assignedUser'
+            'assignedUser',
+            'collections' // Ye line add karni hai
         ])->findOrFail($id);
+
         // dd($booking->toArray());
+
         return Inertia::render('Bookings/Show', [
             'booking' => $booking
         ]);
@@ -68,13 +76,14 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-
         $validated = $this->validateBooking($request);
 
         $validated['created_by'] = auth()->id();
 
+        // Calculate all financials using the helper method
         $this->calculateBooking($validated);
 
+        // Upload Files
         $files = ['booking_form', 'agreement_document', 'payment_receipt'];
         foreach ($files as $file) {
             if ($request->hasFile($file)) {
@@ -87,16 +96,35 @@ class BookingController extends Controller
         try {
             $booking = Booking::create($validated);
 
+            // Create Commission if Channel Partner is assigned
             if (!empty($booking->channel_partner_id)) {
                 Commission::create([
+                    // Relation IDs
                     'booking_id' => $booking->id,
+                    'customer_id' => $booking->customer_id,
+                    'project_id' => $booking->project_id,
                     'channel_partner_id' => $booking->channel_partner_id,
+
+                    // Booking Meta
+                    'booking_number' => $booking->booking_number,
+                    'total_sale_amount' => $booking->total_amount, // As per Commission Model
+
+                    // Commission Data
                     'commission_type' => $booking->commission_type,
                     'commission_value' => $booking->commission_value,
                     'commission_amount' => $booking->commission_amount,
+
+                    // Status & Tracking
+                    'paid_amount' => 0, // Initial state
+                    'due_amount' => $booking->commission_amount, // Due amount is initially the total commission
                     'payment_status' => $booking->commission_status ?? 'Pending',
                     'payment_date' => null,
-                    'remarks' => 'Generated from Booking',
+                    'payment_mode' => null,
+                    'transaction_number' => null,
+                    'bank_name' => null,
+
+                    'remarks' => 'Generated from Booking creation.',
+                    'status' => 'active', // Assuming you have a default status field
                     'created_by' => auth()->id(),
                 ]);
             }
@@ -159,14 +187,34 @@ class BookingController extends Controller
                     'booking_id' => $booking->id,
                 ]);
 
+                // Calculate the new due amount based on updated total and already paid amount
+                $paidAmount = $commission->paid_amount ?? 0;
+                $newDueAmount = $booking->commission_amount - $paidAmount;
+
+                // Safety check: Due amount shouldn't be negative generally, but depends on your business logic
+                if ($newDueAmount < 0)
+                    $newDueAmount = 0;
+
                 $commission->fill([
+                    // Update basic relations just in case they changed
+                    'customer_id' => $booking->customer_id,
+                    'project_id' => $booking->project_id,
                     'channel_partner_id' => $booking->channel_partner_id,
+
+                    // Update Meta
+                    'booking_number' => $booking->booking_number,
+                    'total_sale_amount' => $booking->total_amount,
+
+                    // Update Commission Values
                     'commission_type' => $booking->commission_type,
                     'commission_value' => $booking->commission_value,
                     'commission_amount' => $booking->commission_amount,
+
+                    // Update Tracking
+                    'due_amount' => $newDueAmount,
                     'payment_status' => $commission->payment_status ?? ($booking->commission_status ?? 'Pending'),
-                    'payment_date' => $commission->payment_date,
-                    'remarks' => $commission->remarks ?? 'Updated from Booking.',
+
+                    'remarks' => $commission->remarks ?? 'Updated from Booking modification.',
                     'created_by' => $commission->created_by ?? auth()->id(),
                 ]);
 
@@ -254,10 +302,8 @@ class BookingController extends Controller
         return back()->with('success', 'Booking deleted successfully.');
     }
 
-    private function validateBooking(
-        Request $request,
-        $id = null
-    ) {
+    private function validateBooking(Request $request, $id = null)
+    {
         return $request->validate([
 
 
