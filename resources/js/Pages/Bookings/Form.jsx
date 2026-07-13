@@ -12,72 +12,38 @@ const InputGroup = ({
     errors,
     readOnly = false
 }) => (
-
     <div className="mb-4">
-
         <label className="block text-sm font-medium mb-1">
-
             {label}
-
         </label>
-
         <input
-
             type={type}
-
             readOnly={readOnly}
-
             value={data[name]}
-
             onChange={(e) =>
-
                 !readOnly &&
-
                 setData(name, e.target.value)
-
             }
-
             className={`
-
-w-full
-
-rounded-md
-
-border
-
-px-3
-
-py-2
-
-${readOnly
-
-                    ?
-
-                    "bg-gray-100"
-
-                    :
-
-                    "bg-white"
-
+                w-full
+                rounded-md
+                border
+                px-3
+                py-2
+                ${readOnly
+                    ? "bg-gray-100"
+                    : "bg-white"
                 }
-
-`}
-
+            `}
         />
-
         {errors[name] && (
-
-            <p className="text-red-500 text-xs">
-
+            <p className="text-red-500 text-xs mt-1">
                 {errors[name]}
-
             </p>
-
         )}
-
     </div>
-
 );
+
 const SelectGroup = ({ label, name, options, data, setData, errors, placeholder = "Select..." }) => (
     <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -114,7 +80,7 @@ const DetailCard = ({ label, value }) => (
     </div>
 );
 
-export default function Form({ booking = null, customers, projects, channelPartners, users, submitUrl, isUpdate = false }) {
+export default function Form({ booking = null, customers, projects, channelPartners, users, currentRole, submitUrl, isUpdate = false }) {
 
     const [projectUnits, setProjectUnits] = useState([]);
     const [isLoadingUnits, setIsLoadingUnits] = useState(false);
@@ -146,7 +112,6 @@ export default function Form({ booking = null, customers, projects, channelPartn
         tax_amount: booking?.tax_amount || "",
         total_amount: booking?.total_amount || "",
 
-        // Commission Fields (Ab form se directly control honge)
         commission_type: booking?.commission_type || "Percentage",
         commission_value: booking?.commission_value || "",
         commission_amount: booking?.commission_amount || 0,
@@ -160,7 +125,8 @@ export default function Form({ booking = null, customers, projects, channelPartn
 
         remarks: booking?.remarks || "",
         cancellation_reason: booking?.cancellation_reason || "",
-        status: booking?.status || "Pending",
+        
+        status: booking?.status || "Booked",
         base_price: booking?.base_price || "",
 
         tax_percentage: booking?.tax_percentage || 0,
@@ -171,111 +137,56 @@ export default function Form({ booking = null, customers, projects, channelPartn
 
         refund_amount: booking?.refund_amount || 0,
 
-        registration_date:
-            booking?.registration_date
-                ? booking.registration_date.split("T")[0]
-                : "",
+        registration_date: booking?.registration_date ? booking.registration_date.split("T")[0] : "",
 
-        cancellation_date:
-            booking?.cancellation_date
-                ? booking.cancellation_date.split("T")[0]
-                : "",
+        cancellation_date: booking?.cancellation_date ? booking.cancellation_date.split("T")[0] : "",
 
-        commission_status:
-            booking?.commission_status || "Pending",
+        commission_status: booking?.commission_status || "Pending",
         ...(isUpdate && { _method: 'put' })
     });
 
-    // Auto-Calculate Commission Amount whenever Total Amount or Commission Value changes
     useEffect(() => {
+        const base = parseFloat(data.base_price) || 0;
+        const discount = parseFloat(data.discount_amount) || 0;
+        const other = parseFloat(data.other_amount) || 0;
+        const taxPercent = parseFloat(data.tax_percentage) || 0;
+        const booking = parseFloat(data.booking_amount) || 0;
 
-        const base =
-            parseFloat(data.base_price) || 0;
-
-        const discount =
-            parseFloat(data.discount_amount) || 0;
-
-        const other =
-            parseFloat(data.other_amount) || 0;
-
-        const taxPercent =
-            parseFloat(data.tax_percentage) || 0;
-
-        const booking =
-            parseFloat(data.booking_amount) || 0;
-
-        const subtotal =
-            base - discount + other;
-
-        const tax =
-            (subtotal * taxPercent) / 100;
-
-        const total =
-            subtotal + tax;
-
-        const due =
-            total - booking;
+        const subtotal = base - discount + other;
+        const tax = (subtotal * taxPercent) / 100;
+        const total = subtotal + tax;
+        const due = total - booking;
 
         let commission = 0;
 
         if (data.channel_partner_id) {
-
             if (data.commission_type === "Percentage") {
-
-                commission =
-                    (total *
-                        (parseFloat(data.commission_value) || 0)) /
-                    100;
-
+                commission = (total * (parseFloat(data.commission_value) || 0)) / 100;
             } else {
-
-                commission =
-                    parseFloat(data.commission_value) || 0;
+                commission = parseFloat(data.commission_value) || 0;
             }
         }
 
         setData(prev => ({
-
             ...prev,
-
-            tax_amount:
-                tax.toFixed(2),
-
-            total_amount:
-                total.toFixed(2),
-
-            paid_amount:
-                booking.toFixed(2),
-
-            due_amount:
-                due.toFixed(2),
-
-            commission_amount:
-                commission.toFixed(2)
-
+            tax_amount: tax.toFixed(2),
+            total_amount: total.toFixed(2),
+            paid_amount: booking.toFixed(2),
+            due_amount: due.toFixed(2),
+            commission_amount: commission.toFixed(2)
         }));
 
     }, [
-
         data.base_price,
-
         data.discount_amount,
-
         data.other_amount,
-
         data.tax_percentage,
-
         data.booking_amount,
-
         data.commission_type,
-
         data.commission_value,
-
         data.channel_partner_id
-
     ]);
 
-    // Fetch Units logic
     useEffect(() => {
         if (data.project_id) {
             setIsLoadingUnits(true);
@@ -350,11 +261,21 @@ export default function Form({ booking = null, customers, projects, channelPartn
                     <SelectGroup label="Customer *" name="customer_id" data={data} setData={setData} errors={errors} options={customers.map(c => ({ value: c.id, label: `${c.first_name} ${c.last_name}` }))} />
                     <SelectGroup label="Project *" name="project_id" data={data} setData={setData} errors={errors} options={projects.map(p => ({ value: p.id, label: p.name }))} />
                     <SelectGroup label="Channel Partner" name="channel_partner_id" data={data} setData={setData} errors={errors} options={channelPartners.map(cp => ({ value: cp.id, label: cp.partner_name }))} />
-                    <SelectGroup label="Assigned User" name="assigned_user_id" data={data} setData={setData} errors={errors} options={users.map(u => ({ value: u.id, label: u.name }))} />
+                    {currentRole !== 'employee' && (
+                        <SelectGroup
+                            label="Assigned User"
+                            name="assigned_user_id"
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            options={users.map(u => ({
+                                value: u.id,
+                                label: `${u.name} (${u.role})`
+                            }))}
+                        />
+                    )}
                 </div>
             </div>
-
-
 
             {/* Section 2: Unit Selection */}
             {data.project_id && (
@@ -393,30 +314,102 @@ export default function Form({ booking = null, customers, projects, channelPartn
                                                     </span>
                                                 </div>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                                    {floor.units.map((unit) => (
-                                                        <button
-                                                            type="button"
-                                                            key={unit.unit_id}
-                                                            onClick={() => handleUnitSelect(null, unit)}
-                                                            className={`relative rounded-xl border p-4 transition-all duration-200 text-center ${data.unit_id === unit.unit_id
-                                                                ? "border-[#14B99F] bg-[#14B99F]/10 shadow-lg scale-105"
-                                                                : "border-gray-200 bg-white hover:border-[#14B99F] hover:shadow-md"
-                                                                }`}
-                                                        >
-                                                            {data.unit_id === unit.unit_id && (
-                                                                <CheckCircleIcon className="w-6 h-6 text-[#14B99F] absolute -top-2 -right-2 bg-white rounded-full" />
-                                                            )}
-                                                            <div className="font-bold text-gray-800 text-lg">{unit.unit_name}</div>
-                                                            {unit.configuration && (
-                                                                <div className="text-xs text-gray-500 mt-2">{unit.configuration}</div>
-                                                            )}
-                                                            {unit.unit_size && (
-                                                                <div className="mt-2 text-[#14B99F] text-sm font-medium">
-                                                                    {unit.unit_size} {unit.unit_size_unit}
+                                                    {floor.units.map((unit) => {
+                                                        const isSelected = data.unit_id === unit.unit_id;
+                                                        const isBooked = ["booked", "sold"].includes(unit.status?.toLowerCase());
+                                                        const isHold = unit.status?.toLowerCase() === "hold";
+                                                        const isDisabled = ["booked", "sold", "hold"].includes(unit.status?.toLowerCase());
+
+                                                        return (
+                                                            <button
+                                                                type="button"
+                                                                key={unit.unit_id}
+                                                                disabled={isDisabled}
+                                                                onClick={() => {
+                                                                    if (!isDisabled) {
+                                                                        handleUnitSelect(null, unit);
+                                                                    }
+                                                                }}
+                                                                className={`
+                                                                    relative
+                                                                    rounded-xl
+                                                                    border
+                                                                    p-4
+                                                                    transition-all
+                                                                    duration-200
+                                                                    text-center
+
+                                                                    ${
+                                                                        isSelected
+                                                                        ? "border-[#14B99F] bg-[#14B99F]/10 shadow-lg scale-105"
+                                                                        : ""
+                                                                    }
+
+                                                                    ${
+                                                                        isBooked
+                                                                        ? "bg-red-100 border-red-500 text-red-700 cursor-not-allowed opacity-80"
+                                                                        : ""
+                                                                    }
+
+                                                                    ${
+                                                                        isHold
+                                                                        ? "bg-yellow-100 border-yellow-500 text-yellow-700 cursor-not-allowed opacity-80"
+                                                                        : ""
+                                                                    }
+
+                                                                    ${
+                                                                        !isSelected &&
+                                                                        !isBooked &&
+                                                                        !isHold
+                                                                        ? "border-gray-200 bg-white hover:border-[#14B99F] hover:shadow-md"
+                                                                        : ""
+                                                                    }
+                                                                `}
+                                                            >
+                                                                {isSelected && (
+                                                                    <CheckCircleIcon
+                                                                        className="
+                                                                            w-6 h-6
+                                                                            text-[#14B99F]
+                                                                            absolute
+                                                                            -top-2
+                                                                            -right-2
+                                                                            bg-white
+                                                                            rounded-full
+                                                                        "
+                                                                    />
+                                                                )}
+
+                                                                <div className="font-bold text-lg">
+                                                                    {unit.unit_name}
                                                                 </div>
-                                                            )}
-                                                        </button>
-                                                    ))}
+
+                                                                {unit.configuration && (
+                                                                    <div className="text-xs mt-2">
+                                                                        {unit.configuration}
+                                                                    </div>
+                                                                )}
+
+                                                                {unit.unit_size && (
+                                                                    <div className="mt-2 text-sm font-medium">
+                                                                        {unit.unit_size}
+                                                                        {" "}
+                                                                        {unit.unit_size_unit}
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="mt-2 text-xs font-semibold">
+                                                                    {
+                                                                        isBooked
+                                                                        ? "BOOKED"
+                                                                        : isHold
+                                                                        ? "HOLD"
+                                                                        : "AVAILABLE"
+                                                                    }
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         ))}
@@ -467,172 +460,55 @@ export default function Form({ booking = null, customers, projects, channelPartn
                         setData={setData}
                         errors={errors}
                     />
-
-                    {
-                        data.status === "Cancelled" && (
-
-                            <InputGroup
-                                label="Cancellation Date"
-                                name="cancellation_date"
-                                type="date"
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                            />
-
-                        )
-                    }
+                    
+                    {/* Updated Logic: Show if Cancelled OR Refunded */}
+                    {["Cancelled", "Refunded"].includes(data.status) && (
+                        <InputGroup
+                            label="Cancellation Date"
+                            name="cancellation_date"
+                            type="date"
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                        />
+                    )}
                 </div>
             </div>
 
             {/* Section 5: Financials */}
             <div className="bg-white p-6 rounded-lg shadow border">
-
                 <h3 className="text-lg font-bold mb-6">
                     Financial Details
                 </h3>
-
                 <div className="grid md:grid-cols-3 gap-4">
-
-                    <InputGroup
-                        label="Base Price"
-                        name="base_price"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
-
-                    <InputGroup
-                        label="Booking Amount"
-                        name="booking_amount"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
-
-                    <InputGroup
-                        label="Discount"
-                        name="discount_amount"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
-
-                    <InputGroup
-                        label="Other Charges"
-                        name="other_amount"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
-
-                    <InputGroup
-                        label="Tax %"
-                        name="tax_percentage"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
-
-                    <InputGroup
-                        label="Tax Amount"
-                        name="tax_amount"
-                        type="number"
-                        data={data}
-                        setData={() => { }}
-                        errors={errors}
-                        readOnly
-                    />
-
-                    <InputGroup
-                        label="Total Amount"
-                        name="total_amount"
-                        type="number"
-                        data={data}
-                        setData={() => { }}
-                        errors={errors}
-                        readOnly
-                    />
-
-                    <InputGroup
-                        label="Paid Amount"
-                        name="paid_amount"
-                        type="number"
-                        data={data}
-                        setData={() => { }}
-                        errors={errors}
-                        readOnly
-                    />
-
-                    <InputGroup
-                        label="Due Amount"
-                        name="due_amount"
-                        type="number"
-                        data={data}
-                        setData={() => { }}
-                        errors={errors}
-                        readOnly
-                    />
-
-                    <InputGroup
-                        label="Refund Amount"
-                        name="refund_amount"
-                        type="number"
-                        data={data}
-                        setData={setData}
-                        errors={errors}
-                    />
+                    <InputGroup label="Base Price" name="base_price" type="number" data={data} setData={setData} errors={errors} />
+                    <InputGroup label="Booking Amount" name="booking_amount" type="number" data={data} setData={setData} errors={errors} />
+                    <InputGroup label="Discount" name="discount_amount" type="number" data={data} setData={setData} errors={errors} />
+                    <InputGroup label="Other Charges" name="other_amount" type="number" data={data} setData={setData} errors={errors} />
+                    <InputGroup label="Tax %" name="tax_percentage" type="number" data={data} setData={setData} errors={errors} />
+                    <InputGroup label="Tax Amount" name="tax_amount" type="number" data={data} setData={() => { }} errors={errors} readOnly />
+                    <InputGroup label="Total Amount" name="total_amount" type="number" data={data} setData={() => { }} errors={errors} readOnly />
+                    <InputGroup label="Paid Amount" name="paid_amount" type="number" data={data} setData={() => { }} errors={errors} readOnly />
+                    <InputGroup label="Due Amount" name="due_amount" type="number" data={data} setData={() => { }} errors={errors} readOnly />
+                    <InputGroup label="Refund Amount" name="refund_amount" type="number" data={data} setData={setData} errors={errors} />
                     <SelectGroup
-
                         label="Payment Plan"
-
                         name="payment_plan"
-
                         data={data}
-
                         setData={setData}
-
                         errors={errors}
-
                         options={[
-
-                            {
-                                value: "Construction Linked",
-                                label: "Construction Linked"
-                            },
-
-                            {
-                                value: "Down Payment",
-                                label: "Down Payment"
-                            },
-
-                            {
-                                value: "Flexi",
-                                label: "Flexi"
-                            },
-
-                            {
-                                value: "Lumpsum",
-                                label: "Lumpsum"
-                            },
-
-                            {
-                                value: "Custom",
-                                label: "Custom"
-                            }
-
+                            { value: "Construction Linked", label: "Construction Linked" },
+                            { value: "Down Payment", label: "Down Payment" },
+                            { value: "Flexi", label: "Flexi" },
+                            { value: "Lumpsum", label: "Lumpsum" },
+                            { value: "Custom", label: "Custom" }
                         ]}
-
                     />
                 </div>
-
             </div>
-            {/* NAYA SECTION: Live Commission Input (Sirf tab dikhega jab Channel Partner select hoga) */}
+
+            {/* Section: Live Commission Setup */}
             {data.channel_partner_id && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-2 h-full bg-[#14B99F]"></div>
@@ -658,43 +534,18 @@ export default function Form({ booking = null, customers, projects, channelPartn
                             errors={errors}
                         />
                         <SelectGroup
-
                             label="Commission Status"
-
                             name="commission_status"
-
                             data={data}
-
                             setData={setData}
-
                             errors={errors}
-
                             options={[
-
-                                {
-                                    value: "Pending",
-                                    label: "Pending"
-                                },
-
-                                {
-                                    value: "Approved",
-                                    label: "Approved"
-                                },
-
-                                {
-                                    value: "Paid",
-                                    label: "Paid"
-                                },
-
-                                {
-                                    value: "Cancelled",
-                                    label: "Cancelled"
-                                }
-
+                                { value: "Pending", label: "Pending" },
+                                { value: "Approved", label: "Approved" },
+                                { value: "Paid", label: "Paid" },
+                                { value: "Cancelled", label: "Cancelled" }
                             ]}
-
                         />
-                        {/* Live Calculated Amount Display */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Calculated Commission Amount</label>
                             <div className="w-full bg-[#14B99F]/10 border border-[#14B99F]/30 rounded-md px-3 py-2 text-[#14B99F] font-bold">
@@ -704,6 +555,7 @@ export default function Form({ booking = null, customers, projects, channelPartn
                     </div>
                 </div>
             )}
+
             {/* Section 6: Documents & Remarks */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 border-b pb-3 mb-5">Documents & Status</h3>
@@ -713,15 +565,36 @@ export default function Form({ booking = null, customers, projects, channelPartn
                     <FileGroup label="Payment Receipt" name="payment_receipt" setData={setData} errors={errors} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SelectGroup label="Booking Status *" name="status" data={data} setData={setData} errors={errors} options={[
-                        { value: "Pending", label: "Pending" },
-                        { value: "Confirmed", label: "Confirmed" },
-                        { value: "Completed", label: "Completed" },
-                        { value: "Cancelled", label: "Cancelled" }
-                    ]} />
-                    {data.status === 'Cancelled' && (
-                        <InputGroup label="Cancellation Reason" name="cancellation_reason" data={data} setData={setData} errors={errors} />
+                    {/* Updated Status Options */}
+                    <SelectGroup 
+                        label="Booking Status *" 
+                        name="status" 
+                        data={data} 
+                        setData={setData} 
+                        errors={errors} 
+                        options={[
+                            // { value: "Enquiry", label: "Enquiry" },
+                            // { value: "Hold", label: "Hold" },
+                            { value: "Booked", label: "Booked" },
+                            { value: "Agreement Done", label: "Agreement Done" },
+                            { value: "Registered", label: "Registered" },
+                            { value: "Completed", label: "Completed" },
+                            { value: "Cancelled", label: "Cancelled" },
+                            { value: "Refunded", label: "Refunded" }
+                        ]} 
+                    />
+                    
+                    {/* Updated Logic: Show if Cancelled OR Refunded */}
+                    {["Cancelled", "Refunded"].includes(data.status) && (
+                        <InputGroup 
+                            label="Cancellation Reason" 
+                            name="cancellation_reason" 
+                            data={data} 
+                            setData={setData} 
+                            errors={errors} 
+                        />
                     )}
+                    
                     <div className="md:col-span-2">
                         <InputGroup label="Remarks / Notes" name="remarks" data={data} setData={setData} errors={errors} />
                     </div>

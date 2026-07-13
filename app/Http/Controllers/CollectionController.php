@@ -7,30 +7,39 @@ use App\Models\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-
+use App\Models\User;
 class CollectionController extends Controller
 {
     // 1. List All Schedules & Payments
     public function index(Request $request)
     {
-        $collections = Collection::with([
-            'customer',
-            'project',
-            'booking.collections'
-        ])
-            ->when($request->search, function ($q) use ($request) {
+     $collections = Collection::visibleTo(auth()->user())
+    ->with([
+        'customer',
+        'project',
+        'booking.collections'
+    ])
+    ->when($request->search, function ($q) use ($request) {
 
-                $q->where(function ($query) use ($request) {
+        $q->where(function ($query) use ($request) {
 
-                    $query->where('receipt_number', 'like', "%{$request->search}%")
-                        ->orWhere('installment_name', 'like', "%{$request->search}%");
+            $query->where(
+                'receipt_number',
+                'like',
+                "%{$request->search}%"
+            )
+            ->orWhere(
+                'installment_name',
+                'like',
+                "%{$request->search}%"
+            );
 
-                });
+        });
 
-            })
-            ->orderBy('scheduled_date')
-            ->paginate(15)
-            ->withQueryString();
+    })
+    ->orderBy('scheduled_date')
+    ->paginate(15)
+    ->withQueryString();
 
         return Inertia::render('Collections/Index', [
 
@@ -68,7 +77,8 @@ class CollectionController extends Controller
             'installment_name' => $validated['installment_name'],
             'remarks' => $validated['remarks'],
 
-            'created_by' => auth()->id(), // optional field if you add it to model
+            'created_by_id' => (string) auth()->id(),
+'created_by_type' => User::class, // optional field if you add it to model
         ]);
 
         return back()->with('success', 'Payment schedule created successfully.');
@@ -114,6 +124,8 @@ class CollectionController extends Controller
                 'branch_name' => $validated['branch_name'],
                 'remarks' => $validated['remarks'] ?? $collection->remarks,
                 'received_by' => auth()->id(),
+                'updated_by_id' => (string) auth()->id(),
+    'updated_by_type' => User::class,
             ]);
 
             // Optional: Update Booking Paid Amount
@@ -171,7 +183,10 @@ class CollectionController extends Controller
                 'scheduled_amount' => $schedule['scheduled_amount'],
                 'installment_name' => $schedule['installment_name'],
                 'remarks' => $schedule['remarks'] ?? null,
-                'created_by' => auth()->id(),
+               'created_by_id' => (string) auth()->id(),
+'created_by_type' => User::class,
+'updated_by_id' => (string) auth()->id(),
+        'updated_by_type' => User::class,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -230,7 +245,8 @@ class CollectionController extends Controller
 
                         'remarks' => $schedule['remarks'] ?? null,
 
-                        'created_by' => auth()->id(),
+                        'created_by_id' => (string) auth()->id(),
+'created_by_type' => User::class,
 
                     ]);
 

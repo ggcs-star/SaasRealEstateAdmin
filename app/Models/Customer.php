@@ -5,15 +5,17 @@ namespace App\Models;
 use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-
+use App\Traits\HasOwnership;
 class Customer extends Model
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, HasOwnership;
 
     protected $connection = 'mongodb';
     protected $collection = 'customers';
 
     protected $fillable = [
+        'created_by_id',
+        'created_by_type',
         'first_name',
         'last_name',
         'email',

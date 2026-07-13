@@ -21,7 +21,7 @@ class User extends Authenticatable
         'password',
         'mobile',
         'role',
-        'manager_id',      // Employee kis manager ke under hai
+        'manager_id',      
         'permissions',
     ];
 
@@ -34,29 +34,17 @@ class User extends Authenticatable
         'permissions' => 'array',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
 
-    // Employee -> Manager
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id', '_id');
     }
 
-    // Manager -> Employees
     public function employees()
     {
         return $this->hasMany(User::class, 'manager_id', '_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Role Helpers
-    |--------------------------------------------------------------------------
-    */
 
     public function hasRole(string $role): bool
     {
@@ -78,40 +66,27 @@ class User extends Authenticatable
         return $this->role === UserRole::EMPLOYEE;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Permissions
-    |--------------------------------------------------------------------------
-    */
 
-   public function getRolePermissions(): array
-{
-    $role = Role::where('name', $this->role)->first();
+    public function getRolePermissions(): array
+    {
+        $role = Role::where('name', $this->role)->first();
 
-    return $role->permissions ?? [];
-}
+        return $role->permissions ?? [];
+    }
 
     public function hasPermission(string $permission): bool
     {
-        // Super Admin has all permissions
         if ($this->isSuperAdmin()) {
             return true;
         }
 
-        // User custom permissions
         if (in_array($permission, $this->permissions ?? [])) {
             return true;
         }
 
-        // Role permissions
         return in_array($permission, $this->getRolePermissions());
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Data Visibility (Phase-2)
-    |--------------------------------------------------------------------------
-    */
 
     public function scopeVisibleTo($query, User $user)
     {
@@ -123,7 +98,7 @@ class User extends Authenticatable
             case UserRole::MANAGER:
                 return $query->where(function ($q) use ($user) {
                     $q->where('_id', $user->_id)
-                      ->orWhere('manager_id', $user->_id);
+                        ->orWhere('manager_id', $user->_id);
                 });
 
             case UserRole::EMPLOYEE:
@@ -132,5 +107,36 @@ class User extends Authenticatable
             default:
                 return $query->whereRaw(['_id' => null]);
         }
+    }
+
+    public function accessibleUserIds(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return [];
+        }
+
+        if ($this->isEmployee()) {
+            return [(string) $this->_id];
+        }
+
+        if ($this->isManager()) {
+
+            $employeeIds = User::where(
+                'manager_id',
+                (string) $this->_id
+            )
+                ->get()
+                ->map(function ($user) {
+                    return (string) $user->_id;
+                })
+                ->toArray();
+
+            return array_merge(
+                [(string) $this->_id],
+                $employeeIds
+            );
+        }
+
+        return [(string) $this->_id];
     }
 }

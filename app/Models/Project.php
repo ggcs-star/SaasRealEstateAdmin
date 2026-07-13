@@ -5,8 +5,10 @@ namespace App\Models;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\ObjectId;
+use App\Traits\HasOwnership;
 class Project extends Model
 {
+    use HasOwnership;
     protected $connection = 'mongodb';
     protected $collection = 'projects';
     protected $primaryKey = '_id';
@@ -142,11 +144,11 @@ class Project extends Model
     // }
 
     public function channelPartnerCommissions()
-{
-    return $this->hasMany(
-        ChannelPartnerProject::class,
-        'project_id',
-        '_id'
-    );
-}
+    {
+        return $this->hasMany(
+            ChannelPartnerProject::class,
+            'project_id',
+            '_id'
+        );
+    }
 }

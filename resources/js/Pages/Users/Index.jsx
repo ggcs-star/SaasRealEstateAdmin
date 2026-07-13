@@ -71,10 +71,10 @@ export default function Index() {
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">
-                                    User Role Management
+                                    Staff Role Management
                                 </h1>
                                 <p className="text-sm text-gray-500 mt-1">
-                                    Manage user roles and permissions across the system
+                                    Manage Staff roles and permissions across the system
                                 </p>
                             </div>
                         </div>
@@ -85,7 +85,7 @@ export default function Index() {
                         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500">Total Users</p>
+                                    <p className="text-sm font-medium text-gray-500">Total Staff</p>
                                     <p className="text-2xl font-bold text-gray-900 mt-1">{totalUsers}</p>
                                 </div>
                                 <div className="p-3 bg-emerald-50 rounded-lg">
@@ -137,7 +137,7 @@ export default function Index() {
                                         {/* User Select */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-gray-700">
-                                                Select User <span className="text-red-500">*</span>
+                                                Select Staff <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
                                                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -147,7 +147,7 @@ export default function Index() {
                                                     className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white ${errors.user_id ? 'border-red-300' : 'border-gray-300'
                                                         }`}
                                                 >
-                                                    <option value="">Choose a user...</option>
+                                                    <option value="">Choose a Staff...</option>
                                                     {users.map(user => (
                                                         <option key={user.id || user._id} value={user.id || user._id}>
                                                             {user.name} {user.role ? `(Current: ${user.role})` : ''}
@@ -253,10 +253,10 @@ export default function Index() {
                                 <div className="flex items-center gap-2">
                                     <Users className="w-5 h-5 text-gray-500" />
                                     <h2 className="text-lg font-semibold text-gray-900">
-                                        Users List
+                                        Staff List
                                     </h2>
                                     <span className="ml-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-                                        {filteredUsers.length} users
+                                        {filteredUsers.length} Staff
                                     </span>
                                 </div>
 
@@ -266,7 +266,7 @@ export default function Index() {
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                         <input
                                             type="text"
-                                            placeholder="Search users..."
+                                            placeholder="Search staff..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
@@ -281,7 +281,7 @@ export default function Index() {
                                             onChange={(e) => setRoleFilter(e.target.value)}
                                             className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white text-sm"
                                         >
-                                            <option value="all">All Users</option>
+                                            <option value="all">All Staff</option>
                                             <option value="assigned">With Role</option>
                                             <option value="unassigned">Without Role</option>
                                         </select>
@@ -297,7 +297,7 @@ export default function Index() {
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            User
+                                            Staff
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Email
@@ -372,7 +372,7 @@ export default function Index() {
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Users className="w-12 h-12 text-gray-300 mb-3" />
                                                     <h3 className="text-lg font-medium text-gray-900 mb-1">
-                                                        No users found
+                                                        No Staff found
                                                     </h3>
                                                     <p className="text-sm text-gray-500">
                                                         {searchTerm || roleFilter !== 'all'
@@ -391,7 +391,7 @@ export default function Index() {
                         {filteredUsers.length > 0 && (
                             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
                                 <p className="text-sm text-gray-500">
-                                    Showing {filteredUsers.length} of {totalUsers} total users
+                                    Showing {filteredUsers.length} of {totalUsers} total Staff
                                 </p>
                             </div>
                         )}

@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import Form from './Form';
 
-export default function Create({ auth, customers, projects, channelPartners, users }) {
+export default function Create({ auth, customers, projects, channelPartners, users, currentRole }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="New Booking" />
@@ -17,6 +17,7 @@ export default function Create({ auth, customers, projects, channelPartners, use
                         channelPartners={channelPartners}
                         users={users}
                         isUpdate={false}
+                        currentRole={currentRole}
                     />
                 </div>
             </div>

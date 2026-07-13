@@ -248,7 +248,7 @@ export default function Authenticated({ user, header, children }) {
                     <SidebarItem
                         href="users.index"
                         icon={Users}
-                        label="Users"
+                        label="Staff"
                         permission="view users"
                     />
 
