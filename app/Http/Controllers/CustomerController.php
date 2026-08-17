@@ -7,20 +7,24 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
-
+use App\Models\User;
 class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $customers = Customer::when($request->search, function ($q) use ($request) {
-            $q->where('first_name', 'like', "%{$request->search}%")
-                ->orWhere('last_name', 'like', "%{$request->search}%")
-                ->orWhere('email', 'like', "%{$request->search}%")
-                ->orWhere('mobile', 'like', "%{$request->search}%");
-        })
+        $customers = Customer::visibleTo(auth()->user())
+            ->when($request->search, function ($q) use ($request) {
+                $q->where(function ($query) use ($request) {
+                    $query->where('first_name', 'like', "%{$request->search}%")
+                        ->orWhere('last_name', 'like', "%{$request->search}%")
+                        ->orWhere('email', 'like', "%{$request->search}%")
+                        ->orWhere('mobile', 'like', "%{$request->search}%");
+                });
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
+        ;
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
@@ -37,7 +41,8 @@ class CustomerController extends Controller
     {
         $validated = $this->validateCustomer($request);
         $validated['password'] = Hash::make($validated['password']);
-
+        $validated['created_by_id'] = (string) auth()->id();
+        $validated['created_by_type'] = User::class;
         Customer::create($validated);
 
         return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
@@ -45,7 +50,8 @@ class CustomerController extends Controller
 
     public function edit($id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = Customer::visibleTo(auth()->user())
+            ->findOrFail($id);
         // dd($customer);
         return Inertia::render('Customers/Edit', [
             'customer' => $customer
@@ -55,7 +61,8 @@ class CustomerController extends Controller
 
     public function update(Request $request, $id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = Customer::visibleTo(auth()->user())
+            ->findOrFail($id);
 
         $validated = $this->validateCustomer($request, $id);
 
@@ -72,10 +79,17 @@ class CustomerController extends Controller
             ->with('success', 'Customer updated successfully.');
     }
 
-    public function destroy(Customer $customer)
+    public function destroy($id)
     {
+        $customer = Customer::visibleTo(auth()->user())
+            ->findOrFail($id);
+
         $customer->delete();
-        return back()->with('success', 'Customer deleted successfully.');
+
+        return back()->with(
+            'success',
+            'Customer deleted successfully.'
+        );
     }
 
     // Helper method for clean validation
@@ -123,7 +137,8 @@ class CustomerController extends Controller
     }
     public function show($id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = Customer::visibleTo(auth()->user())
+            ->findOrFail($id);
 
         return Inertia::render('Customers/Show', [
             'customer' => $customer,

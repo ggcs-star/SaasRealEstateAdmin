@@ -6,6 +6,7 @@ use MongoDB\Laravel\Eloquent\Model;
 
 class Booking extends Model
 {
+
     protected $fillable = [
         'booking_number',
 
@@ -59,8 +60,12 @@ class Booking extends Model
         'cancellation_reason',
         'status',
 
-        'created_by',
-        'updated_by',
+
+        'created_by_id',
+        'created_by_type',
+
+        'updated_by_id',
+        'updated_by_type'
     ];
 
     protected $casts = [
@@ -152,19 +157,19 @@ class Booking extends Model
 
     public function createdBy()
     {
-        return $this->belongsTo(
-            User::class,
-            'created_by',
-            '_id'
+        return $this->morphTo(
+            __FUNCTION__,
+            'created_by_type',
+            'created_by_id'
         );
     }
 
     public function updatedBy()
     {
-        return $this->belongsTo(
-            User::class,
-            'updated_by',
-            '_id'
+        return $this->morphTo(
+            __FUNCTION__,
+            'updated_by_type',
+            'updated_by_id'
         );
     }
 
@@ -205,5 +210,53 @@ class Booking extends Model
         )->latest();
     }
 
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
 
+        $employeeIds = [];
+
+        if ($user->isManager()) {
+
+            $employeeIds = User::where(
+                'manager_id',
+                (string) $user->_id
+            )
+                ->get()
+                ->map(function ($employee) {
+                    return (string) $employee->getKey();
+                })
+                ->filter()
+                ->values()
+                ->toArray();
+        }
+
+        return $query->where(function ($q) use ($user, $employeeIds) {
+
+            $q->where(
+                'created_by_id',
+                (string) $user->_id
+            )
+
+                ->orWhere(
+                    'assigned_user_id',
+                    (string) $user->_id
+                );
+
+            if ($user->isManager()) {
+
+                $q->orWhereIn(
+                    'created_by_id',
+                    $employeeIds
+                );
+
+                $q->orWhereIn(
+                    'assigned_user_id',
+                    $employeeIds
+                );
+            }
+        });
+    }
 }

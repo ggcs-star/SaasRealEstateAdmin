@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
-
+use App\Traits\HasOwnership;
 class Collection extends Model
 {
+    use HasOwnership;
     // Agar hum ek hi table use kar rahe hain, to usme Schedule aur Actual Payment dono ka data aayega.
     protected $fillable = [
 
         'booking_id',
         'customer_id',
         'project_id',
-        
+
         // Isse pata chalega ki ye actual receipt hai ya bas ek scheduled installment plan ki entry hai
         'type', // e.g., 'Scheduled', 'Actual_Payment'
 
@@ -25,7 +26,7 @@ class Collection extends Model
         'receipt_number',
         'payment_date',       // Kis din actual me paisa mila
         'paid_amount',        // Kitna paisa actual me mila
-        
+
         'payment_mode',       // Cash, Cheque, NEFT, UPI
         'transaction_number',
         'cheque_number',
@@ -37,9 +38,13 @@ class Collection extends Model
 
         'received_by',
         'verified_by',
+        'created_by_id',
+        'created_by_type',
 
+        'updated_by_id',
+        'updated_by_type',
         // STATUS: Pending, Paid, Partially Paid, Overdue
-        'status', 
+        'status',
     ];
 
     protected $casts = [
@@ -57,8 +62,8 @@ class Collection extends Model
             // Receipt number sirf tab generate karo jab type 'Actual_Payment' ho
             if ($collection->type === 'Actual_Payment') {
                 $last = self::where('type', 'Actual_Payment')
-                            ->orderBy('created_at', 'desc')
-                            ->first();
+                    ->orderBy('created_at', 'desc')
+                    ->first();
 
                 if ($last && $last->receipt_number) {
                     $lastNo = (int) str_replace('RC', '', $last->receipt_number);
@@ -72,7 +77,7 @@ class Collection extends Model
         });
     }
 
-  
+
 
     public function booking()
     {

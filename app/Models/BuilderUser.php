@@ -6,11 +6,11 @@ use MongoDB\Laravel\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Role;
-
+use App\Traits\HasOwnership;
 class BuilderUser extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
-
+    use HasApiTokens, Notifiable, HasOwnership;
+    protected string $ownershipColumn = 'created_by_id';
     protected $connection = 'mongodb';
     protected $collection = 'builders_users';
 
@@ -24,6 +24,8 @@ class BuilderUser extends Authenticatable
         'address',
         'logo',
         'status',
+        'created_by_id',
+        'created_by_type',
     ];
 
     protected $hidden = [

@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
-
+use App\Traits\HasOwnership;
 class Commission extends Model
 {
+use HasOwnership;
     protected $fillable = [
 
 
